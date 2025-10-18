@@ -3,7 +3,7 @@ from bson import ObjectId
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 from app.models.exception_model import NotFoundException, BadRequestException, DatabaseException,GenericException
-from app.models.restaurant_model import RestaurantCreate, RestaurantUpdate, RestaurantInDB
+from app.models.restaurant_model import RestaurantCreate, RestaurantUpdate, RestaurantInDB, DishFilterModel, DishValidationResult
 from app.db import get_db
 from pymongo.errors import PyMongoError
 from langchain.prompts import ChatPromptTemplate
@@ -148,7 +148,18 @@ def delete_restaurant(restaurant_id:str):
 
 
 def apply_filters(query,dishes):
+    """
+    Extract and apply filters (price, ingredients, allergens, nutrition) to a list of dishes.
+
+    Args:
+        query (str): User query describing filter preferences.
+        dishes (List[Dict]): List of dish objects with price, ingredients, and nutrition fields.
+
+    Returns:
+        List[Dict]: Filtered dishes matching user criteria.
+    """
     logging.debug(f"Applying filters to : {dishes}")
+
     if not dishes:
         return []
     prompt_template = ChatPromptTemplate.from_template("""
@@ -176,15 +187,19 @@ Response:
 Now analyze this query:
 {query}
 """)
-    response =  llm.invoke(prompt_template.format_messages(query=query))
-    filters = json.loads(response.content)
-    logging.debug(f"Generated filters : {filters}")
+    try:
+        response =  llm.invoke(prompt_template.format_messages(query=query))
+        raw_filters = json.loads(response.content)
+        filters = DishFilterModel.parse_obj(raw_filters)
+        logging.debug(f"Generated filters : {filters.dict()}")
+    except Exception as e:
+        raise GenericException(str(e))
 
-    price = filters.get("price",{})
-    include_ing = set(filters.get("ingredients",{}).get("include",[]))
-    exclude_ing = set(filters.get("ingredients",{}).get("exclude",[]))
-    exclude_allergens = set(filters.get("allergens",{}).get("exclude",[]))
-    nutrition = filters.get("nutrition",{})
+    # price = filters.get("price",{})
+    # include_ing = set(filters.get("ingredients",{}).get("include",[]))
+    # exclude_ing = set(filters.get("ingredients",{}).get("exclude",[]))
+    # exclude_allergens = set(filters.get("allergens",{}).get("exclude",[]))
+    # nutrition = filters.get("nutrition",{})
 
     def passes_nutrition_filter(dish):
         facts = dish.get("nutrition_facts", {})
@@ -193,26 +208,27 @@ Now analyze this query:
             return facts.get(key, {}).get("value", 0)
 
         # Apply nutrition-based conditions (optional, only if present)
-        if "max_calories" in nutrition and get_val("calories") > nutrition["max_calories"]:
+        n = filters.nutrition
+        if n.max_calories and get_val("calories") > n.max_calories:
             return False
-        if "min_protein" in nutrition and get_val("protein") < nutrition["min_protein"]:
+        if n.min_protein and get_val("protein") < n.min_protein:
             return False
-        if "max_fat" in nutrition and get_val("fat") > nutrition["max_fat"]:
+        if n.max_fat and get_val("fat") > n.max_fat:
             return False
-        if "max_carbs" in nutrition and get_val("carbohydrates") > nutrition["max_carbs"]:
+        if n.max_carbs and get_val("carbohydrates") > n.max_carbs:
             return False
         return True
 
     filtered = []
     for d in dishes:
         try:
-            if not (price.get("min", float("-inf")) <= d.get("price", 0) <= price.get("max", float("inf"))):
+            if not (filters.price.min <= d.get("price", 0) <= filters.price.max):
                 continue
-            if include_ing and not include_ing.issubset(set(d.get("ingredients", []))):
+            if filters.ingredients.include and not set(filters.ingredients.include).issubset(set(d.get("ingredients", []))):
                 continue
-            if exclude_ing and exclude_ing.intersection(set(d.get("ingredients", []))):
+            if filters.ingredients.exclude and set(filters.ingredients.exclude).intersection(set(d.get("ingredients", []))):
                 continue
-            if exclude_allergens and exclude_allergens.intersection(
+            if filters.allergens.exclude and set(filters.allergens.exclude).intersection(
                 {a["allergen"] for a in d.get("inferred_allergens", []) + d.get("explicit_allergens", [])}
             ):
                 continue
@@ -221,7 +237,6 @@ Now analyze this query:
             filtered.append(d)
         except Exception as e:
             logging.error(str(e))
-            continue
 
     logging.debug(f"Filtered Dishes: {filtered}")
     return filtered
@@ -231,31 +246,32 @@ def validate_retrieved_dishes(query:str, dishes:list):
         return []
 
     prompt_template =ChatPromptTemplate.from_template("""
-You are an intelligent restaurant assistant helping to filter dishes for a user query.
+        You are an intelligent restaurant assistant helping to filter dishes for a user query.
 
-User query: {query}
+        User query: {query}
 
-For each of the following dishes, decide whether it matches the user's request.
-Be strict but reasonable — match meaningfully relevant dishes, not partial overlaps.
+        For each of the following dishes, decide whether it matches the user's request.
+        Be strict but reasonable — match meaningfully relevant dishes, not partial overlaps.
 
-Output ONLY a valid JSON list:
-[
-  {{"dish_id": "...", "include": true/false, "reason": "..."}},
-  ...
-]
+        Output ONLY a valid JSON list:
+        [
+        {{"dish_id": "...", "include": true/false, "reason": "..."}},
+        ...
+        ]
 
-Dishes:
-{dishes}
-""")
-    response =  llm.invoke(prompt_template.format_messages(query=query,dishes=dishes))
+        Dishes:
+        {dishes}
+    """)
     try:
-        filtered_dish_ids = json.loads(response.content)
-        logging.debug(f"Filtered Dish IDs : {filtered_dish_ids}")
-        valid_ids = {item["dish_id"] for item in filtered_dish_ids if item.get("include")}
-        logging.debug(f"Valid Dish IDs : {valid_ids} ")
-        filtered_dishes = [d for d in dishes if d.get("_id") in valid_ids]
+        response =  llm.invoke(prompt_template.format_messages(query=query,dishes=dishes))
+        parsed = json.loads(response.content)
+        logging.debug(f"Filtered Dish IDs : {parsed}")
+        validated = [DishValidationResult(**item) for item in parsed]
     except Exception as e:
-        logging.error(str(e))
-        filtered_dishes = []
+        raise GenericException(str(e))
+
+    valid_ids = {v.dish_id for v in validated if v.include }
+    logging.debug(f"Valid Dish IDs : {valid_ids} ")
+    filtered_dishes = [d for d in dishes if d.get("_id") in valid_ids]
     logging.debug(f"Filtered Dishes by LLM : {filtered_dishes}")
     return filtered_dishes

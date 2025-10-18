@@ -5,6 +5,7 @@ from langgraph.constants import END
 from ..services.intent_service import extract_query_intent
 from ..services.retrieval_service import get_menu_items
 from ..services.dish_info_service import get_dish_info
+from ..services.response_synthesizer_tool import format_final_response
 
 logger = logging.getLogger(__name__)
 # def route_branches_debugger(state):
@@ -43,11 +44,12 @@ def create_chat_graph():
     graph.add_node("query_part_generator",generate_query_parts)
     graph.add_node("menu_retriever",get_menu_items)
     graph.add_node("informative_retriever",get_dish_info)
-    graph.add_node("last_node",last_node)
+    graph.add_node("format_final_response",format_final_response)
     graph.set_entry_point("intent_classifier")
     graph.add_edge("intent_classifier","query_part_generator")
     graph.add_edge("query_part_generator","menu_retriever")
     graph.add_edge("query_part_generator","informative_retriever")
-    graph.add_edge("menu_retriever","last_node")
-    graph.add_edge("informative_retriever","last_node")
+    graph.add_edge("menu_retriever","format_final_response")
+    graph.add_edge("informative_retriever","format_final_response")
+    graph.set_finish_point("format_final_response")
     return graph.compile()

@@ -1,5 +1,6 @@
 from fastapi import APIRouter,HTTPException, Depends
 from bson import ObjectId
+from fastapi.responses import JSONResponse
 from app.models.restaurant_model import RestaurantCreate, RestaurantUpdate, RestaurantBase, RestaurantInDB
 from app.services import restaurant_service
 from pydantic import BaseModel, Field
@@ -48,10 +49,11 @@ async def chat_search(payload: ChatQuery):
     """
     try:
         chat_graph = create_chat_graph()
-        query = "Any pizza under $20 that includes pepperoni?"
+        query = "Any pizza under $50.Also, what's the average price for a pizza in this restaurant?"
         state = ChatState(user_id="u123", session_id="sess001",restaurant_id="rest_1", query=query,query_parts={})
         
         final_state = chat_graph.invoke(state)
+        return JSONResponse(status_code=200, content=final_state)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
