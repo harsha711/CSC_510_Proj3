@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './Home.css';
+import RestaurantMenu from './RestaurantMenu';
 
 // Placeholder restaurants - based on restaurant_model.py structure
 const placeholderRestaurants = [
@@ -158,7 +159,7 @@ function Home() {
               <h2 className="restaurant-name">{restaurant.name}</h2>
               
               <div className="restaurant-rating">
-                <span className="star">⭐</span>
+                <img src="/icons/pixel_perfect_flaticon_star.png" alt="Rating" className="star-icon" />
                 <span className="rating-value">{restaurant.rating.toFixed(1)}</span>
               </div>
               
@@ -167,7 +168,8 @@ function Home() {
               </div>
               
               <div className="restaurant-location">
-                📍 {restaurant.location}
+                <img src="/icons/md_tanvirul_haque_flaticon_location.png" alt="Location" className="location-icon" />
+                {restaurant.location}
               </div>
             </div>
           </div>
@@ -175,18 +177,12 @@ function Home() {
       </div>
 
       {/* Popup Modal */}
-      {isPopupOpen && selectedRestaurant && (
-        <div className="popup-overlay" onClick={closePopup}>
-          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-            <button className="popup-close-btn" onClick={closePopup}>
-              ✕
-            </button>
-            
-            <h2 className="popup-title">Restaurant Menu</h2>
-            <p className="popup-restaurant-name">{selectedRestaurant.name}</p>
-            <p className="popup-message">Work in progress</p>
-          </div>
-        </div>
+      {selectedRestaurant && (
+        <RestaurantMenu 
+          restaurant={selectedRestaurant}
+          isOpen={isPopupOpen}
+          onClose={closePopup}
+        />
       )}
     </div>
   );
