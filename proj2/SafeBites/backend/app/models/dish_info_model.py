@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 
 
 class DishData(BaseModel):
+    dish_id: str
     dish_name : str = Field(default="N/A")
     description : Optional[str] = None
     price : Optional[Any] = None
@@ -15,8 +16,7 @@ class DishData(BaseModel):
 class DishInfoResponse(BaseModel):
     dish_name : Optional[str] = None
     requested_info : Optional[str] = None
-    source_data : Optional[str] = None
-    message : Optional[str] = None
+    source_data : Optional[List[Any]] = None
 
 class IntentResponse(BaseModel):
     type : str

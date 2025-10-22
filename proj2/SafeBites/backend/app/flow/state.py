@@ -12,12 +12,12 @@ class ChatState(BaseModel):
     query:str
     # intents:Optional[List[Dict[str,Any]]] = None
     intents:Optional[IntentExtractionResult] = None
-    context:Optional[Dict[str,Any]] = None
+    context:Optional[List[Dict[str,Any]]] = None
     query_parts: Optional[Dict[str,Any]] = None
     # menu_results: Optional[Dict[str,List[Dict[str, Any]]]] = None
     menu_results: Optional[MenuResultResponse] = None
     # info_results: Optional[Dict[str,Dict[str, Any]]] = None
-    info_results: Optional[Dict[str,DishInfoResponse]] = None
+    info_results: Optional[DishInfoResult] = None
     data : Dict[str,Any] = {}
     response : str = ""
     status : str = "pending"

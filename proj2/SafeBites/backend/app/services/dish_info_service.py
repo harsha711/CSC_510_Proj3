@@ -185,31 +185,6 @@ def get_dish_info(state):
             continue
     
         context = ""
-        for result in dish:
-            dish = result
-            context += f"""
-        Dish Name: {dish.get('dish_name', 'N/A')}
-        Description: {dish.get('description', 'N/A')}
-        Price: {dish.get('price', 'N/A')}
-        Ingredients: {', '.join(dish.get('ingredients', []))}
-        Serving Size: {dish.get('serving_size', 'N/A')}
-        Availability: {dish.get('availability', 'N/A')}
-        Allergens: {', '.join([a for a in dish.get('allergens', [])])}
-        Nutrition: {dish.get('nutrition_facts', {})}
-        """
-            
-        try:
-            dishes = handle_food_item_query(query, restaurant_id=restaurant_id)
-            dishes = apply_filters(query,dishes)
-            dishes = validate_retrieved_dishes(query,dishes)
-        except NotFoundException as e:
-            results[query] = DishInfoResponse(message=str(e))
-            continue
-        except Exception as e:
-            results[query] = DishInfoResponse(message=f"Unexpected error : {str(e)}")
-            continue
-    
-        context = ""
         context = "\n".join([
             f"Dish Name : {d.dish_name}\n"
             f"Description : {d.description}\n"

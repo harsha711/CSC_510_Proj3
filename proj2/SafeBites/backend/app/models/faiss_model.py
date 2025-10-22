@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List, Dict, Any, Optional
-from pydantic import BaseModel,ConfigDict
+from pydantic import BaseModel, ConfigDict
 
 class QueryIntent(BaseModel):
     positive : List[str]
