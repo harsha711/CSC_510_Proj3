@@ -121,8 +121,8 @@ def extract_query_intent(state):
             for q in queries:
                 intents.append(IntentQuery(type=intent_type, query=q))
     
-        return IntentExtractionResult(intents=intents)
+        return {"intents":IntentExtractionResult(intents=intents)}
     except Exception as e:
-        return IntentExtractionResult(
+        return {"intents":IntentExtractionResult(
             intents=[IntentQuery(type="irrelevant",query=query)]
-        )
+        )}

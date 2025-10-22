@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
+from .dish_info_model import DishData
 
 class RestaurantBase(BaseModel):
     name:str
@@ -59,4 +60,4 @@ class MenuQueryResults(BaseModel):
     dishes: List[Dict[str,Any]] = Field(default_factory=list)
 
 class MenuResultResponse(BaseModel):
-    menu_results:Dict[str,List[Dict[str,Any]]] = Field(default_factory=list)
+    menu_results: Dict[str, List[DishData]] = Field(default_factory=dict)
