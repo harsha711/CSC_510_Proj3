@@ -1,12 +1,34 @@
 import { useState, useRef, useEffect } from 'react';
 import './SearchChat.css';
 
+const API_BASE_URL = 'https://safebites-yu1o.onrender.com';
+
+interface DishResult {
+  dish_id: string;
+  dish_name: string;
+  description: string;
+  price: number;
+  ingredients: string[];
+  allergens: string[];
+  nutrition_facts?: {
+    calories?: { value: number; confidence?: number };
+    protein?: { value: number; confidence?: number };
+    fat?: { value: number; confidence?: number };
+    carbohydrates?: { value: number; confidence?: number };
+    sugar?: { value: number; confidence?: number };
+    fiber?: { value: number; confidence?: number };
+  };
+  serving_size?: string;
+  availaibility?: boolean | null;
+}
+
 interface Message {
   id: string;
   type: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  results?: any[]; // For dish/menu results
+  menuResults?: DishResult[];
+  infoResults?: any;
 }
 
 function SearchChat() {
@@ -18,10 +40,10 @@ function SearchChat() {
 
   // Example queries for quick start
   const exampleQueries = [
-    "Show me vegan pasta options",
-    "Dishes without gluten under $15",
-    "What are the calories in chocolate cake?",
-    "List all desserts with nuts"
+    "Show me pizza dishes",
+    "What dishes contain nuts?",
+    "Show me all pasta options",
+    "List dishes under $20"
   ];
 
   // Auto-scroll to bottom when new messages arrive
@@ -61,6 +83,7 @@ function SearchChat() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentQuery = inputValue.trim();
     setInputValue('');
     setIsLoading(true);
 
@@ -70,129 +93,163 @@ function SearchChat() {
     }
 
     try {
-      // TODO: Replace with actual API call to /restaurants/search
-      // const response = await fetch('/api/restaurants/search', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     query: inputValue.trim(),
-      //     restaurant_id: "rest_1" // Should come from context/state
-      //   })
-      // });
-      // const data = await response.json();
+      // Simple request body - just query and restaurant_id
+      const requestBody = {
+        query: currentQuery,
+        restaurant_id: "rest_1"
+      };
 
-      // Simulate API delay (1.5-3 seconds for realism)
-      const delay = Math.random() * 1500 + 1500;
-      await new Promise(resolve => setTimeout(resolve, delay));
+      console.log('=== CHAT API REQUEST ===');
+      console.log('URL:', `${API_BASE_URL}/restaurants/search`);
+      console.log('Body:', JSON.stringify(requestBody, null, 2));
 
-      // ============================================
-      // MOCK RESPONSES FOR TESTING
-      // Replace this entire section with real API call later
-      // ============================================
+      // Call the search API (correct endpoint!)
+      const response = await fetch(`${API_BASE_URL}/restaurants/search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      console.log('=== CHAT API RESPONSE ===');
+      console.log('Status:', response.status);
+      console.log('Status Text:', response.statusText);
+
+      // Get the response text first
+      const responseText = await response.text();
+      console.log('Response Text (first 500 chars):', responseText.substring(0, 500));
+
+      // Try to parse as JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('Parsed JSON:', data);
+      } catch (parseError) {
+        console.error('Failed to parse response as JSON:', parseError);
+        throw new Error(`API returned non-JSON response: ${responseText.substring(0, 200)}`);
+      }
+
+      if (!response.ok) {
+        console.error('API Error Response:', data);
+        throw new Error(
+          data.detail || 
+          data.message || 
+          data.error ||
+          `API request failed with status ${response.status}`
+        );
+      }
+
+      // Process the response
+      let assistantContent = '';
+      let menuResults: DishResult[] = [];
+      let infoResults = null;
+
+      console.log('=== PROCESSING RESPONSE ===');
+
+      // Extract menu results (dishes)
+      if (data.menu_results && Object.keys(data.menu_results).length > 0) {
+        console.log('Found menu_results:', data.menu_results);
+        
+        // menu_results is an object with queries as keys
+        Object.entries(data.menu_results).forEach(([query, results]: [string, any]) => {
+          console.log(`Processing query "${query}":`, results);
+          if (Array.isArray(results)) {
+            menuResults = [...menuResults, ...results];
+          }
+        });
+
+        if (menuResults.length > 0) {
+          assistantContent = `I found ${menuResults.length} dish${menuResults.length > 1 ? 'es' : ''} matching your search! 🍽️`;
+          console.log('Total dishes found:', menuResults.length);
+        }
+      } else {
+        console.log('No menu_results in response');
+      }
+
+      // Extract info results (answers to questions)
+      if (data.info_results && data.info_results.info_results) {
+        console.log('Found info_results:', data.info_results);
+        infoResults = data.info_results.info_results;
+        
+        // Build response text from info results
+        const infoTexts: string[] = [];
+        Object.entries(infoResults).forEach(([question, info]: [string, any]) => {
+          console.log(`Info for "${question}":`, info);
+          if (info.requested_info) {
+            infoTexts.push(info.requested_info);
+          }
+        });
+
+        if (infoTexts.length > 0) {
+          if (assistantContent) {
+            assistantContent += '\n\n' + infoTexts.join('\n\n');
+          } else {
+            assistantContent = infoTexts.join('\n\n');
+          }
+        }
+      } else {
+        console.log('No info_results in response');
+      }
+
+      // Use the general response if available and no specific results
+      if (!assistantContent && data.response) {
+        console.log('Using general response field:', data.response);
+        assistantContent = data.response;
+      }
+
+      // Check status field
+      if (data.status) {
+        console.log('Response status:', data.status);
+      }
+
+      // Fallback if still no content
+      if (!assistantContent && menuResults.length === 0) {
+        console.log('No content found in response, using fallback message');
+        assistantContent = "I couldn't find any results for your query. Could you try rephrasing or ask about specific dishes or dietary preferences?";
+      }
+
+      console.log('=== FINAL ASSISTANT MESSAGE ===');
+      console.log('Content:', assistantContent);
+      console.log('Menu Results Count:', menuResults.length);
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: assistantContent,
+        timestamp: new Date(),
+        menuResults: menuResults.length > 0 ? menuResults : undefined,
+        infoResults: infoResults
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+
+    } catch (error: any) {
+      console.error('=== ERROR ===');
+      console.error('Error details:', error);
+      console.error('Error message:', error.message);
       
-      const query = userMessage.content.toLowerCase();
-      let mockResponse: Message;
-
-      // Scenario 1: Menu search query
-      if (query.includes('vegan') || query.includes('pasta') || query.includes('pizza')) {
-        mockResponse = {
-          id: (Date.now() + 1).toString(),
-          type: 'assistant',
-          content: `I found 3 delicious options for "${userMessage.content}"! 🍝`,
-          timestamp: new Date(),
-          results: [
-            {
-              name: "Margherita Pizza",
-              description: "Classic pizza with fresh mozzarella and basil",
-              price: 12.99,
-              allergens: ["dairy", "wheat_gluten"]
-            },
-            {
-              name: "Penne Arrabbiata",
-              description: "Spicy tomato sauce with garlic and red chili",
-              price: 14.99,
-              allergens: ["wheat_gluten"]
-            },
-            {
-              name: "Vegan Buddha Bowl",
-              description: "Quinoa, roasted vegetables, and tahini dressing",
-              price: 11.99,
-              allergens: []
-            }
-          ]
-        };
-      }
-      // Scenario 2: Allergen/nutrition query
-      else if (query.includes('calories') || query.includes('allergen') || query.includes('gluten')) {
-        mockResponse = {
-          id: (Date.now() + 1).toString(),
-          type: 'assistant',
-          content: `Here's what I found about "${userMessage.content}":\n\nThe Chocolate Lava Cake contains approximately 450 calories per serving. It contains the following allergens: dairy, eggs, and wheat gluten. Would you like to see alternative dessert options?`,
-          timestamp: new Date()
-        };
-      }
-      // Scenario 3: Price filter
-      else if (query.includes('under') || query.includes('$') || query.includes('cheap')) {
-        mockResponse = {
-          id: (Date.now() + 1).toString(),
-          type: 'assistant',
-          content: `Great! I found 2 budget-friendly options under $15:`,
-          timestamp: new Date(),
-          results: [
-            {
-              name: "Caesar Salad",
-              description: "Romaine lettuce with Caesar dressing and croutons",
-              price: 8.99,
-              allergens: ["dairy", "egg"]
-            },
-            {
-              name: "Tomato Soup",
-              description: "Creamy tomato soup with fresh basil",
-              price: 6.50,
-              allergens: ["dairy"]
-            }
-          ]
-        };
-      }
-      // Scenario 4: No results
-      else if (query.includes('xyz') || query.length < 3) {
-        mockResponse = {
-          id: (Date.now() + 1).toString(),
-          type: 'assistant',
-          content: `I couldn't find any dishes matching "${userMessage.content}". Could you try rephrasing your search or ask about specific dietary preferences?`,
-          timestamp: new Date()
-        };
-      }
-      // Default: Generic helpful response
-      else {
-        mockResponse = {
-          id: (Date.now() + 1).toString(),
-          type: 'assistant',
-          content: `I found some results for "${userMessage.content}". Here are the top matches:`,
-          timestamp: new Date(),
-          results: [
-            {
-              name: "Chef's Special",
-              description: "Today's special prepared by our head chef",
-              price: 18.99,
-              allergens: ["dairy", "shellfish"]
-            }
-          ]
-        };
-      }
+      let errorContent = 'Sorry, I encountered an error processing your request. ';
       
-      // ============================================
-      // END MOCK RESPONSES
-      // ============================================
-
-      setMessages(prev => [...prev, mockResponse]);
-    } catch (error) {
-      console.error('Error sending message:', error);
+      // More specific error messages
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        errorContent += 'Could not connect to the server. Please check your internet connection.';
+      } else if (error.message.includes('404')) {
+        errorContent += 'The search endpoint was not found. Please contact support.';
+      } else if (error.message.includes('500')) {
+        errorContent += 'The server encountered an error. The service might be starting up (this can take 30-60 seconds on Render). Please try again in a moment.';
+      } else if (error.message.includes('timeout')) {
+        errorContent += 'The request timed out. The server might be slow to respond.';
+      } else if (error.message.includes('non-JSON')) {
+        errorContent += 'The server returned an invalid response format.';
+      } else {
+        errorContent += `Error: ${error.message}`;
+      }
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: 'Sorry, I encountered an error processing your request. Please try again.',
+        content: errorContent,
         timestamp: new Date()
       };
       
@@ -221,13 +278,13 @@ function SearchChat() {
       <div className="chat-header">
         <h1 className="chat-title">Search Chat</h1>
         <div className="chat-instructions">
-          <h3>💬 How to use:</h3>
+          <h3>How to use:</h3>
           <ul>
-            <li>Ask questions in natural language, like <code>"Show me vegan options"</code></li>
-            <li>Filter by allergens: <code>"Dishes without nuts"</code></li>
-            <li>Set price limits: <code>"Under $20"</code></li>
-            <li>Ask about nutrition: <code>"How many calories in this dish?"</code></li>
-            <li>Combine filters: <code>"Gluten-free pasta under $15"</code></li>
+            <li>Ask questions in natural language, like <code>"Show me pizza dishes"</code></li>
+            <li>Ask about allergens: <code>"Does pizza contain any nuts?"</code></li>
+            <li>Set price limits: <code>"Show dishes under $20"</code></li>
+            <li>Ask about nutrition: <code>"What are the calories in this dish?"</code></li>
+            <li>Combine queries: <code>"Pizza dishes. Also, does pizza contain nuts?"</code></li>
             <li>Press <strong>Enter</strong> to send, <strong>Shift+Enter</strong> for new line</li>
           </ul>
         </div>
@@ -261,18 +318,53 @@ function SearchChat() {
                 <div className={`message-bubble ${message.type}`}>
                   <p className="message-content">{message.content}</p>
                   
-                  {/* Render results if present */}
-                  {message.results && message.results.length > 0 && (
-                    <div>
-                      {message.results.map((result, idx) => (
-                        <div key={idx} className="result-card">
-                          <h4>{result.name}</h4>
-                          <p>{result.description}</p>
-                          <p className="price">${result.price.toFixed(2)}</p>
-                          {result.allergens && result.allergens.length > 0 && (
-                            <p>
-                              <strong>Allergens:</strong> {result.allergens.join(', ')}
+                  {/* Render menu results (dishes) if present */}
+                  {message.menuResults && message.menuResults.length > 0 && (
+                    <div className="results-container">
+                      {message.menuResults.map((dish, idx) => (
+                        <div key={dish.dish_id || idx} className="result-card">
+                          <div className="result-header">
+                            <h4 className="result-name">{dish.dish_name}</h4>
+                            <span className="result-price">${dish.price.toFixed(2)}</span>
+                          </div>
+                          
+                          <p className="result-description">{dish.description}</p>
+                          
+                          {/* Serving Size */}
+                          {dish.serving_size && (
+                            <p className="result-detail">
+                              <strong>Serving:</strong> {dish.serving_size}
                             </p>
+                          )}
+                          
+                          {/* Allergens */}
+                          {dish.allergens && dish.allergens.length > 0 && (
+                            <div className="result-allergens">
+                              <strong>Allergens:</strong>
+                              <div className="allergen-tags">
+                                {dish.allergens.map((allergen, aIdx) => (
+                                  <span key={aIdx} className="allergen-tag">
+                                    {allergen}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Nutrition Facts Preview */}
+                          {dish.nutrition_facts && (
+                            <div className="result-nutrition">
+                              <strong>Nutrition:</strong>{' '}
+                              {dish.nutrition_facts.calories && (
+                                <span>{dish.nutrition_facts.calories.value} cal</span>
+                              )}
+                              {dish.nutrition_facts.protein && (
+                                <span> • {dish.nutrition_facts.protein.value}g protein</span>
+                              )}
+                              {dish.nutrition_facts.carbohydrates && (
+                                <span> • {dish.nutrition_facts.carbohydrates.value}g carbs</span>
+                              )}
+                            </div>
                           )}
                         </div>
                       ))}
@@ -293,7 +385,7 @@ function SearchChat() {
                     <div className="loading-dot"></div>
                     <div className="loading-dot"></div>
                   </div>
-                  <span className="loading-text">Thinking...</span>
+                  <span className="loading-text">Searching...</span>
                 </div>
               </div>
             )}
