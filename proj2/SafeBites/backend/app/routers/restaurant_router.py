@@ -67,6 +67,7 @@ async def chat_search(payload: ChatQuery):
         session_id = state_service.get_or_create_session("u123", restaurant_id)
 
         context = state_service.rebuild_context(session_id)
+        logger.debug(f"Rebuilt Context: {context}")
 
         chat_graph = create_chat_graph()
         state = ChatState(user_id="u123", session_id=session_id, restaurant_id=restaurant_id, query=query, query_parts={},

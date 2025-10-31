@@ -25,6 +25,8 @@ def sample_chat_state():
         query="I want pizza and tell me calories."
     )
 
+
+@pytest.fixture
 def sample_dish_data():
     return [
         DishData(
@@ -224,7 +226,7 @@ def test_only_menu_search(mock_llm):
     menu_queries = [i.query for i in intents if i.type == "menu_search"]
     assert menu_queries == ["Show me all vegan options."]
 
-
+@patch("app.services.intent_service.llm")
 def test_only_dish_info(mock_llm):
     state = ChatState(
         user_id="user1",
@@ -273,7 +275,7 @@ def test_multi_part_query(mock_llm):
     irrelevant_queries = [i.query for i in intents if i.type == "irrelevant"]
 
     assert menu_queries == ["Provide pizza under $15"]
-    assert dish_queries == ["Tell me the infredients of the pasta."]
+    assert dish_queries == ["Tell me the ingredients of the pasta."]
     assert irrelevant_queries == ["Tell me a joke."] 
 
 
@@ -327,7 +329,7 @@ def test_search_dishes_filtered_hits(mock_collection,mock_faiss):
     results = search_dishes("pasta",restaurant_id="rest_1",threshold=0.8)
 
     assert len(results) == 1
-    assert results[0].dish["_id"] == "Dish 1"
+    assert results[0].dish["name"] == "Dish 1"
     assert results[0].score >= 0.8
     assert isinstance(results[0].embedding,np.ndarray)
 
@@ -368,7 +370,7 @@ def test_refine_with_centroid(mock_embeddings):
 
 @patch("app.services.restaurant_service.llm")
 def test_apply_filters_success(mock_llm,sample_dish_data):
-    mock_llm.return_value = SimpleNamespace(
+    mock_llm.invoke.return_value = SimpleNamespace(
         content = json.dumps({
             "price": {"max": 10, "min": 0},
             "ingredients": {"include": ["chocolate"], "exclude": []},
@@ -381,12 +383,12 @@ def test_apply_filters_success(mock_llm,sample_dish_data):
 
     assert len(filtered) == 1
     assert filtered[0].dish_name == "Chocolate Cake"
-    mock_llm.assert_called_once()
+    mock_llm.invoke.assert_called_once()
 
 
 @patch("app.services.restaurant_service.llm")
 def test_apply_filters_exclude_ingredient(mock_llm,sample_dish_data):
-    mock_llm.return_value = SimpleNamespace(
+    mock_llm.invoke.return_value = SimpleNamespace(
         content = json.dumps({
             "price": {"max": 15, "min": 0},
             "ingredients": {"include": [], "exclude": ["chocolate"]},
@@ -401,7 +403,7 @@ def test_apply_filters_exclude_ingredient(mock_llm,sample_dish_data):
 
 @patch("app.services.restaurant_service.llm")
 def test_apply_filters_exclude_allergen(mock_llm,sample_dish_data):
-    mock_llm.return_value = SimpleNamespace(
+    mock_llm.invoke.return_value = SimpleNamespace(
         content = json.dumps({
             "price": {"max": 20, "min": 0},
             "ingredients": {"include": [], "exclude": []},
@@ -418,7 +420,7 @@ def test_apply_filters_exclude_allergen(mock_llm,sample_dish_data):
 
 @patch("app.services.restaurant_service.llm")
 def test_apply_filters_nutrition_filtering(mock_llm,sample_dish_data):
-    mock_llm.return_value = SimpleNamespace(
+    mock_llm.invoke.return_value = SimpleNamespace(
         content = json.dumps({
             "price": {"max": 50, "min": 0},
             "ingredients": {"include": [], "exclude": []},

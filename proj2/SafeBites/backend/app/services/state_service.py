@@ -1,6 +1,6 @@
 from datetime import datetime
 from bson import ObjectId
-
+from fastapi.encoders import jsonable_encoder
 from ..flow.state import ChatState
 from ..db import db
 import uuid
@@ -12,7 +12,7 @@ def get_or_create_session(user_id:str, restaurant_id:str):
     existing_session = sessions.find_one({"user_id": user_id, "restaurant_id": restaurant_id,"active":True})
 
     if existing_session:
-        return sessions["session_id"]
+        return existing_session["session_id"]
     
 
     session_id = f"sess_{uuid.uuid4().hex[:10]}"
@@ -27,7 +27,7 @@ def get_or_create_session(user_id:str, restaurant_id:str):
 
 
 def save_chat_state(state:ChatState):
-    chat_states.insert_one(state.dict())
+    chat_states.insert_one(jsonable_encoder(state))
 
 def get_all_chat_states(session_id:str):
     docs = list(chat_states.find({"session_id":session_id}).sort("timestamp",1))
@@ -35,13 +35,13 @@ def get_all_chat_states(session_id:str):
 
 def rebuild_context(session_id:str,last_n:int=5):
     chat_states = get_all_chat_states(session_id)
+    print(f"Chat States for context rebuild: {chat_states}")
     context = []
     for cs in chat_states[-last_n:]:
-        state = cs["state"]
         context.append({
-            "query": state["query"],
-            "intents": state.get("intents", []),
-            "menu_results": state.get("menu_results", {}),
-            "info_results": state.get("info_results", {})
+            "query": cs["query"],
+            "intents": cs.get("intents", []),
+            "menu_results": cs.get("menu_results", {}),
+            "info_results": cs.get("info_results", {})
         })
     return context

@@ -37,4 +37,4 @@ Return only the rewritten query text.
         context=state.context or {}
     ))
     print("Resolved Context Response:", response.content)
-    return response.strip()
+    return {"query": response.content.strip()}
