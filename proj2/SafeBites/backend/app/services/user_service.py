@@ -5,6 +5,7 @@ from passlib.context import CryptContext
 
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 def _strip_password(doc: dict) -> dict:
     if not doc:
         return doc
@@ -17,7 +18,7 @@ def create_user(user_create):
     existing = db.users.find_one({"username": user_create.username})
     if existing:
         raise ConflictException(detail="Username already taken")
-    hashed = pwd_ctx.hash(user_create.password)
+    hashed = pwd_ctx.hash(user_create.password[:72])
     doc = user_create.model_dump()
     doc["password"] = hashed
     try:
