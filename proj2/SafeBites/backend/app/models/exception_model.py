@@ -19,3 +19,8 @@ class AuthError(HTTPException):
     """Raised when there is an authentication error."""
     def __init__(self, detail: str = "Authentication failed"):
         super().__init__(status_code=401, detail=detail)
+
+class ConflictException(HTTPException):
+    """Raised for 409 conflicts (duplicate username/dish)."""
+    def __init__(self, detail: str = "Conflict"):
+        super().__init__(status_code=409, detail=detail)

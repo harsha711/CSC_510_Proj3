@@ -1,6 +1,6 @@
 from fastapi import FastAPI, status
 from fastapi.responses import JSONResponse
-from app.models.exception_model import NotFoundException, BadRequestException, DatabaseException,AuthError
+from app.models.exception_model import NotFoundException, BadRequestException, DatabaseException,AuthError, ConflictException
 
 
 def register_exception_handlers(app):
@@ -29,3 +29,7 @@ def register_exception_handlers(app):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"error": exc.message}
         )
+    
+    @app.exception_handler(ConflictException)
+    async def conflict_exception_handler(request, exc: ConflictException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
