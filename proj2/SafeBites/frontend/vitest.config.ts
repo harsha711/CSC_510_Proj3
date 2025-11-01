@@ -5,8 +5,10 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
-    environment: 'happy-dom',  // Changed from 'jsdom'
-    setupFiles: './src/test/setup.ts',
+    environment: 'happy-dom',
+    setupFiles: './src/frontend_test/setup.ts',  // ← Updated path
     css: true,
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['node_modules', 'dist'],
   },
 })
