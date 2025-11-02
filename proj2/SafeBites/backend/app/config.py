@@ -8,6 +8,8 @@ load_dotenv()
 
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = os.getenv("DB_NAME")
+TEST_DB_NAME = os.getenv("TEST_DB_NAME", "foodapp_test")
+JWT_SECRET = os.getenv("JWT_SECRET", "change_me")
 
 
 LOG_DIR = os.path.join(os.path.dirname(__file__), "logs")

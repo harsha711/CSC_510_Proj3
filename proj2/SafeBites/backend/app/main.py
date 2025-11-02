@@ -16,6 +16,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+from app.routers import dish_router, user_router
+from app.services.exception_service import register_exception_handlers
+import uvicorn
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -24,6 +27,7 @@ logger.info("Setting up routers....")
 app.include_router(restaurant_router.router)
 app.include_router(dish_router.router)
 app.include_router(user_router.router)
+
 
 logger.info("Registering Exception Handlers....")
 register_exception_handlers(app)
