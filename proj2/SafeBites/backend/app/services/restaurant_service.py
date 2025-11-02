@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 from app.models.exception_model import NotFoundException, BadRequestException, DatabaseException,GenericException
 from app.models.restaurant_model import RestaurantCreate, RestaurantUpdate, RestaurantInDB, DishFilterModel, DishValidationResult
+from app.services.faiss_service import update_faiss_index
 from app.db import get_db
 from pymongo.errors import PyMongoError
 from langchain.prompts import ChatPromptTemplate
@@ -66,18 +67,19 @@ async def create_restaurant(restaurant:RestaurantCreate, menu_csv, background_ta
 def process_menu_file(file_path:str,restaurant_id:str):
     try:
         dishes = parse_menu_csv(file_path,restaurant_id)
+        created_dish = []
         print(dishes)
         for dish in dishes:
             if not dish.ingredients or not dish.explicit_allergens or not dish.nutrition_facts:
                 enrich_dish_info(dish)
-                # dish.ingredients = enriched.get("ingredients", dish.ingredients)
-                # dish.allergens = enriched.get("allergens", dish.allergens)
             print(dish.dict())
-            created_dish = create_dish(restaurant_id, dish)
-            print(created_dish)
+            inserted_dish = create_dish(restaurant_id, dish)
+            print(inserted_dish)
+        
+        if created_dish:
+            update_faiss_index(created_dish)
     except Exception as e:
         logger.error(f"Error processing menu file for restaurant {restaurant_id}: {str(e)}")
-        # raise GenericException(f"Error processing menu file: {str(e)}") 
 
 def enrich_dish_info(dish:DishCreate):
     llm = ChatOpenAI(model="gpt-5", api_key=os.environ.get("OPENAI_KEY"))
@@ -333,13 +335,31 @@ Return only JSON in this structure:
   "nutrition": {{"max_calories": <float>, "min_protein": <float>}}
 }}
 
+Rules:
+- Extract only **true ingredients**, not dish types or categories.
+  For example, "cheese", "chicken", "nuts", or "tomato" are ingredients.
+  But "pizza", "burger", "pasta", or "sandwich" are **dish types**, not ingredients — exclude them.
+- If the user asks for a specific dish type (like "List pizza dishes" or "Show me burgers"),
+  leave the `ingredients.include` list empty.
+- Use `price`, `allergens`, and `nutrition` only when mentioned.
+- Never include a dish type (e.g. pizza, burger, pasta) in the ingredients list.
+
 Example:
-Query: "Show me dishes with chocolate but without nuts under 10 dollars."
+Query: "Show me chocolate dishes under 10 dollars."
 Response:
 {{
   "price": {{"max": 10, "min": 0}},
-  "ingredients": {{"include": ["chocolate"], "exclude": ["nuts"]}},
-  "allergens": {{"exclude": ["nuts"]}},
+  "ingredients": {{"include": ["chocolate"], "exclude": []}},
+  "allergens": {{"exclude": []}},
+  "nutrition": {{}}
+}}
+
+Query: "List pizza dishes"
+Response:
+{{
+  "price": {{}},
+  "ingredients": {{"include": [], "exclude": []}},
+  "allergens": {{}},
   "nutrition": {{}}
 }}
 

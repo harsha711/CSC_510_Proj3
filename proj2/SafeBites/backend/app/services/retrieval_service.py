@@ -23,12 +23,16 @@ def get_menu_items(state):
     query_parts = getattr(state,"query_parts",{}).get("menu_search",[])
 
     if not query_parts:
-        raise Exception("No Menu Search Queries found in state.query_parts.")
+        logger.warning("No menu_search query parts found in state.")
+        return MenuResultResponse(menu_results=results)
 
     logger.info(f"Processing {len(query_parts)} menu search queries for restaurant {restaurant_id}")
     for q in query_parts:
         logging.debug(f"Retrieving menu items for query: {q} and restaurant_id: {restaurant_id}")
         try:
+            if state.current_context:
+                logging.debug(f"Appending current context to query: {state.current_context}")
+                q = f"{q}\n\nAdditional context:\n{state.current_context}"
             hits = semantic_retrieve_with_negation(q, restaurant_id)
             logging.debug(f"Retrieved data from semantic search: {hits}")
             dish_results = [DishData(
@@ -52,8 +56,9 @@ def get_menu_items(state):
             dish_results = validate_retrieved_dishes(q,dish_results)
             results[q] = dish_results
         except Exception as e:
+            logger.error(f"Error processing query '{q}': {e}", exc_info=True)
             results[q] = []
-            raise GenericException(str(e))
+            # raise GenericException(str(e))
         
     # return {"menu_results":results}
     return MenuResultResponse(menu_results=results)

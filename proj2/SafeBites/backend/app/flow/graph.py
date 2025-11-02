@@ -51,7 +51,7 @@ def create_chat_graph():
     graph.add_node("menu_retriever",get_menu_items)
     graph.add_node("informative_retriever",get_dish_info)
     graph.add_node("format_final_response",format_final_response)
-    graph.set_entry_point("intent_classifier")
+    graph.set_entry_point("context_resolver")
     graph.add_edge("context_resolver","intent_classifier")
     graph.add_edge("intent_classifier","query_part_generator")
     graph.add_edge("query_part_generator","menu_retriever")

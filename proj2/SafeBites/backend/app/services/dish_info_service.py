@@ -111,16 +111,6 @@ def handle_food_item_query(query, restaurant_id=None):
     results = []
     for hit in hits:
         dish = hit.dish
-        # Retrieved dish from hit: {
-        #     '_id': 'dish_5',
-        #      'restaurant_id': 'rest_1',
-        #       'name': 'Pizza Express Margherita', 
-        #       'description': 'Classic Margherita pizza with a wheat-flour crust, tomato passata, and mozzarella, finished with basil and oregano.', 
-        #       'price': 25.88, 
-        #       'ingredients': ['Water', 'Sugar', 'Yeast', 'Plain Flour', 'Salt', 'Olive Oil', 'Passata', 'Mozzarella', 'Oregano', 'Basil', 'Black Pepper'], 
-        #       'inferred_allergens': [{'allergen': 'wheat_gluten', 'confidence': 0.98, 'why': 'Contains plain flour made from wheat, a source of gluten.'}, {'allergen': 'dairy', 'confidence': 0.98, 'why': 'Contains mozzarella cheese (milk).'}],
-        #         'nutrition_facts': {'calories': {'value': 1030, 'confidence': 0.6}, 'protein': {'value': 42, 'confidence': 0.6}, 'fat': {'value': 33, 'confidence': 0.6}, 'carbohydrates': {'value': 135, 'confidence': 0.6}, 'sugar': {'value': 10, 'confidence': 0.6}, 'fiber': {'value': 6, 'confidence': 0.6}}, 
-        # 'availaibility': True, 'serving_size': 'single', 'explicit_allergens': []}
         logger.debug(f"Retrieved dish from hit: {dish}")
         results.append(DishData(
             dish_id= dish["_id"],
@@ -142,6 +132,10 @@ def get_dish_info(state):
     restaurant_id = state.restaurant_id
     for query in state.query_parts.get("dish_info",[]):
         logging.debug(f"Getting dish info for query: {query} and restaurant_id: {restaurant_id}")
+
+        if state.current_context:
+            logging.debug(f"Appending current context to query: {state.current_context}")
+            query = f"{query}\n\nAdditional context:\n{state.current_context}"
         
         try:
             intent = derive_dish_info_intent(query)

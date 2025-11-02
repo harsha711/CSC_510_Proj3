@@ -13,6 +13,7 @@ class ChatState(BaseModel):
     # intents:Optional[List[Dict[str,Any]]] = None
     intents:Optional[IntentExtractionResult] = None
     context:Optional[List[Dict[str,Any]]] = None
+    current_context:Optional[str] = ""
     query_parts: Optional[Dict[str,Any]] = None
     # menu_results: Optional[Dict[str,List[Dict[str, Any]]]] = None
     menu_results: Optional[MenuResultResponse] = None

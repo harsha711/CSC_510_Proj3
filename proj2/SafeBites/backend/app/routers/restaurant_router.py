@@ -71,7 +71,7 @@ async def chat_search(payload: ChatQuery):
 
         chat_graph = create_chat_graph()
         state = ChatState(user_id="u123", session_id=session_id, restaurant_id=restaurant_id, query=query, query_parts={},
-                          context=context)
+                          context=context,current_context="")
 
         final_state = chat_graph.invoke(state)
         logger.debug(f"Final State: {final_state}")

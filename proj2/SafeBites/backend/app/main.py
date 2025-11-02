@@ -1,6 +1,8 @@
-import logging
+import logging, os
+import threading
 from fastapi import FastAPI
 from app.routers import restaurant_router, dish_router, user_router
+from app.services.faiss_service import build_faiss_from_db
 from app.services.exception_service import register_exception_handlers
 from fastapi.middleware.cors import CORSMiddleware
 from .config import setup_logging
@@ -25,6 +27,20 @@ app.include_router(user_router.router)
 
 logger.info("Registering Exception Handlers....")
 register_exception_handlers(app)
+
+@app.on_event("startup")
+async def initialize_faiss():
+    """
+    On startup, verify the FAISS index exists.
+    If missing, trigger an asynchronous background rebuild.
+    """
+    index_path = "faiss_index_restaurant"
+
+    if not os.path.exists(index_path):
+        logger.warning("FAISS index not found. Triggering rebuild from database...")
+        threading.Thread(target=build_faiss_from_db,daemon=True).start()
+    else:
+        logger.info("FAISS index found and ready to use.")
 
 @app.get("/")
 def root():

@@ -129,6 +129,99 @@ def create_faiss_index(json_path = "./seed_data/dishes_refined.json"):
         logging.info("FAISS index created and saved locally.")
     except Exception as e:
         raise GenericException(f"FAISS index creation failed : {str(e)}")
+    
+
+def build_faiss_from_db(index_path:str = "faiss_index_restaurant"):
+    """
+    Build or rebuild the FAISS vector index from all dishes in the database.
+
+    This function scans the `dishes` collection, extracts textual fields,
+    embeds them using the configured embedding model, and stores them locally
+    in a FAISS vector store for downstream RAG queries.
+
+    Args:
+        index_path (str): Directory path where the FAISS index will be saved.
+
+    Raises:
+        GenericException: If index creation or database retrieval fails.
+    """
+    try:
+        logger.info("Startting FAISS index rebuild from database....")
+
+        dishes = list(dish_collection.find())
+
+        if not dishes:
+            logger.warning("No dishes found in the database; FAISS index not created.")
+            return
+        
+        texts, metadata = [], []
+
+        for i, dish in enumerate(dishes):
+            text = f"""
+                Dish Name: {dish.get("name", "")}
+                Description: {dish.get("description", "")}
+                Price: {dish.get("price", "N/A")}
+                Ingredients: {', '.join(dish.get("ingredients", []))}
+                Serving Size: {dish.get("serving_size", "")}
+                Availability: {dish.get("availability", True)}
+                Allergens: {', '.join([a.get("allergen", "") for a in dish.get("inferred_allergens", [])])}
+                Nutrition: {dish.get("nutrition_facts", {})}
+            """
+            texts.append(text.strip())
+
+            metadata.append({
+                "dish_id":dish["_id"],
+                "restaurant_id":dish["restaurant_id"],
+                "vector_id":i
+            })
+
+            vector_store = FAISS.from_texts(texts=texts,embedding = embeddings,metadatas=metadata)
+            vector_store.save_local(index_path)
+
+            logger.info(f"FAISS index successfully rebuilt with {len(dishes)} dishes.")
+    except Exception as e:
+        logger.error(f"Failed to build faiss index: {str(e)} ")
+        raise GenericException(f"FAISS rebuild failed : {str(e)}")
+    
+def update_faiss_index(new_dishes,index_path="faiss_index_restaurant"):
+    """
+    Incrementally updates (or creates) a FAISS index with new dishes.
+    """
+    try:
+        if os.path.exists(index_path):
+            vector_store = FAISS.load_local(index_path, embeddings,allow_dangerous_deserialization=True)
+        else:
+            vector_store = None
+        
+        texts, metadata = [], []
+        for i, dish in enumerate(new_dishes):
+            text = f"""
+                Dish Name: {dish.get("name", "")}
+                Description: {dish.get("description", "")}
+                Price: {dish.get("price", "N/A")}
+                Ingredients: {', '.join(dish.get("ingredients", []))}
+                Serving Size: {dish.get("serving_size", "")}
+                Availability: {dish.get("availability", True)}
+                Allergens: {', '.join([a.get("allergen", "") for a in dish.get("inferred_allergens", [])])}
+                Nutrition: {dish.get("nutrition_facts", {})}
+            """
+            texts.append(text)
+
+            metadata.append({
+                "dish_id":dish["_id"],
+                "restaurant_id":dish["restaurant_id"],
+                "vector_id":i
+            })
+
+            if vector_store:
+                vector_store.add_texts(texts=texts, metadatas=metadata)
+            else:
+                vector_store = FAISS.from_texts(texts=texts, embedding=embeddings, metadatas=metadata)
+            
+            vector_store.save_local(index_path)
+            logging.info(f"FAISS index updated with {len(new_dishes)} dishes.")
+    except Exception as e:
+        logger.error(f"Failed to update FAISS index : {str(e)}")
 
 def search_dishes(query, restaurant_id=None,top_k=20,threshold=0.8):
     """
