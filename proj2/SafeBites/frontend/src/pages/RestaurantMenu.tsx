@@ -58,8 +58,10 @@ function RestaurantMenu({ restaurant, isOpen, onClose }: RestaurantMenuProps) {
           setIsLoading(true);
           setError(null);
           
-          // Use the restaurant query parameter to filter dishes
-          const response = await fetch(`${API_BASE_URL}/dishes/?restaurant=${restaurant._id}`);
+          // Use the restaurant and user_id query parameters to filter dishes
+          // TODO: Replace 'user_default' with actual user ID from auth context
+          const userId = "user_default"; // Placeholder user ID
+          const response = await fetch(`${API_BASE_URL}/dishes/?restaurant=${restaurant._id}&user_id=${userId}`);
           
           if (!response.ok) {
             throw new Error(`Failed to fetch dishes: ${response.status}`);
