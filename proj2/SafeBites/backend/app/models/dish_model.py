@@ -7,7 +7,7 @@ class AllergenInfo(BaseModel):
     why: Optional[str] = None
 
 class DishCreate(BaseModel):
-    restaurant_id: str
+    restaurant_id: Optional[str] = None
     name: str
     description: Optional[str] = None
     ingredients: List[str] = Field(default_factory=list)

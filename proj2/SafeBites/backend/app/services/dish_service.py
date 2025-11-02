@@ -11,24 +11,15 @@ def _to_out(doc: dict) -> dict:
     doc["_id"] = str(doc["_id"])
     return doc
 
-# def create_dish(restaurant_id: str, data):
-#     doc = data.model_dump()
-#     doc["availability"] = doc.get("availability", True)
-#     doc["restaurant_id"] = restaurant_id
-#     res = db.dishes.insert_one(doc)
-#     created = db.dishes.find_one({"_id": res.inserted_id})
-#     return _to_out(created)
-
 def create_dish(restaurant_id: str, dish_create):
-    if not dish_create.name or not dish_create.restaurant:
+    if not dish_create.name or not dish_create.restaurant_id:
         raise BadRequestException(message="Missing required dish fields")
     # enforce unique dish name per restaurant
-    existing = db.dishes.find_one({"name": dish_create.name, "restaurant": dish_create.restaurant})
+    existing = db.dishes.find_one({"name": dish_create.name, "restaurant_id": dish_create.restaurant_id})
     if existing:
         raise ConflictException(detail="Dish with same name already exists for this restaurant")
     doc = dish_create.model_dump()
     doc["availability"] = doc.get("availability", True)
-    doc["restaurant_id"] = restaurant_id
     try:
         res = db.dishes.insert_one(doc)
         created = db.dishes.find_one({"_id": res.inserted_id})
@@ -62,18 +53,6 @@ def list_dishes(filter_query: dict, user_id: str = None):
     except Exception as e:
         raise DatabaseException(message=f"Failed to list dishes: {e}")
 
-
-# def list_dishes(filter_query: dict):
-#     print(filter_query)
-#     docs = db.dishes.find(filter_query).to_list(length=200)
-#     return [_to_out(d) for d in docs]
-
-# def get_dish(dish_id: str):
-#     doc = db.dishes.find_one({"_id": ObjectId(dish_id)})
-#     if not doc:
-#         raise HTTPException(status_code=404, detail="Dish not found")
-#     return _to_out(doc)
-
 def get_dish(dish_id: str, user_id: str = None):
     try:
         obj = ObjectId(dish_id)
@@ -95,14 +74,6 @@ def get_dish(dish_id: str, user_id: str = None):
         d_out["safe_for_user"] = None
     return d_out
 
-
-# def update_dish(dish_id: str, update_data: dict):
-#     res = db.dishes.update_one({"_id": ObjectId(dish_id)}, {"$set": update_data})
-#     if res.matched_count == 0:
-#         raise HTTPException(status_code=404, detail="Dish not found")
-#     updated = db.dishes.find_one({"_id": ObjectId(dish_id)})
-#     return _to_out(updated)
-
 def update_dish(dish_id: str, update_data: dict):
     if not update_data:
         raise BadRequestException(message="No fields to update")
@@ -110,7 +81,6 @@ def update_dish(dish_id: str, update_data: dict):
         obj = ObjectId(dish_id)
     except Exception:
         raise NotFoundException(name="Invalid dish id")
-    # If changing name/restaurant, ensure uniqueness
     if "name" in update_data or "restaurant" in update_data:
         current = db.dishes.find_one({"_id": obj})
         if not current:
@@ -136,9 +106,3 @@ def delete_dish(dish_id: str):
     if res.deleted_count == 0:
         raise NotFoundException(name="Dish not found")
     return
-
-
-# def delete_dish(dish_id: str):
-#     res = db.dishes.delete_one({"_id": ObjectId(dish_id)})
-#     if res.deleted_count == 0:
-#         raise HTTPException(status_code=404, detail="Dish not found")

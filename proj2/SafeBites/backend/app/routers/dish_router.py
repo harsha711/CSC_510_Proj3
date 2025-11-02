@@ -17,6 +17,7 @@ router = APIRouter(prefix="/dishes", tags=["dishes"])
 
 @router.post("/{restaurant_id}", response_model=DishOut, status_code=201)
 def create_dish(restaurant_id:str, payload: DishCreate):
+    payload.restaurant_id = restaurant_id
     return dish_service.create_dish(restaurant_id, payload)
 
 @router.get("/", response_model=List[DishOut])
