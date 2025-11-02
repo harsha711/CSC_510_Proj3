@@ -11,8 +11,11 @@ function AddRestaurant() {
     city: '',
     state: '',
     zipCode: '',
-    description: ''
+    description: '',
+    rating: ''
   });
+  const [menuCsv, setMenuCsv] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const cuisineOptions = [
     'Italian', 'Japanese', 'Chinese', 'Mexican', 'Thai',
@@ -37,7 +40,19 @@ function AddRestaurant() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+        alert('Please upload a CSV file');
+        e.target.value = '';
+        return;
+      }
+      setMenuCsv(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
@@ -53,11 +68,50 @@ function AddRestaurant() {
       alert('Please fill in all address fields');
       return;
     }
+    if (!formData.rating || parseFloat(formData.rating) < 0 || parseFloat(formData.rating) > 5) {
+      alert('Please enter a valid rating between 0 and 5');
+      return;
+    }
+    if (!menuCsv) {
+      alert('Please upload a menu CSV file');
+      return;
+    }
 
-    // Add restaurant submission logic here
-    console.log('Restaurant Data:', formData);
-    alert('Restaurant submitted successfully! We will review your application.');
-    navigate('/');
+    setIsSubmitting(true);
+
+    try {
+      // Combine address fields into location string
+      const location = `${formData.street}, ${formData.city}, ${formData.state} ${formData.zipCode}`;
+      
+      // Create FormData for multipart/form-data
+      const apiFormData = new FormData();
+      apiFormData.append('restaurant_name', formData.restaurantName);
+      apiFormData.append('location', location);
+      apiFormData.append('cuisine', formData.cuisine.join(', ')); // Join multiple cuisines
+      apiFormData.append('rating', formData.rating);
+      apiFormData.append('menu_csv', menuCsv);
+
+      // Submit to API
+      const response = await fetch('/restaurants', {
+        method: 'POST',
+        body: apiFormData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Restaurant created:', result);
+      
+      alert('Restaurant submitted successfully! We will review your application.');
+      navigate('/');
+    } catch (error) {
+      console.error('Error submitting restaurant:', error);
+      alert('Failed to submit restaurant. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -120,6 +174,25 @@ function AddRestaurant() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="rating">
+                  Restaurant Rating <span className="required">*</span>
+                </label>
+                <p className="field-description">Enter a rating between 0 and 5</p>
+                <input
+                  type="number"
+                  id="rating"
+                  name="rating"
+                  value={formData.rating}
+                  onChange={handleInputChange}
+                  placeholder="4.5"
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  required
+                />
               </div>
 
               <div className="form-group">
@@ -203,13 +276,69 @@ function AddRestaurant() {
               </div>
             </div>
 
+            {/* Menu Upload Section */}
+            <div className="form-section">
+              <h2 className="section-title">Menu Upload</h2>
+              
+              <div className="form-group">
+                <label htmlFor="menuCsv">
+                  Menu CSV File <span className="required">*</span>
+                </label>
+                <p className="field-description">Upload your restaurant menu as a CSV file with allergen information</p>
+                <div className="file-upload-wrapper">
+                  <input
+                    type="file"
+                    id="menuCsv"
+                    name="menuCsv"
+                    accept=".csv"
+                    onChange={handleFileChange}
+                    className="file-input"
+                    required
+                  />
+                  <label htmlFor="menuCsv" className="file-label">
+                    {menuCsv ? (
+                      <span className="file-selected">
+                        📄 {menuCsv.name}
+                      </span>
+                    ) : (
+                      <span className="file-placeholder">
+                        📁 Choose CSV file or drag here
+                      </span>
+                    )}
+                  </label>
+                </div>
+                {menuCsv && (
+                  <button
+                    type="button"
+                    className="remove-file-btn"
+                    onClick={() => {
+                      setMenuCsv(null);
+                      const fileInput = document.getElementById('menuCsv') as HTMLInputElement;
+                      if (fileInput) fileInput.value = '';
+                    }}
+                  >
+                    ✕ Remove file
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Submit Section */}
             <div className="form-actions">
-              <button type="button" className="cancel-btn" onClick={() => navigate('/')}>
+              <button 
+                type="button" 
+                className="cancel-btn" 
+                onClick={() => navigate('/')}
+                disabled={isSubmitting}
+              >
                 Cancel
               </button>
-              <button type="submit" className="submit-btn">
-                Submit Restaurant
+              <button 
+                type="submit" 
+                className="submit-btn"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Restaurant'}
               </button>
             </div>
           </form>
