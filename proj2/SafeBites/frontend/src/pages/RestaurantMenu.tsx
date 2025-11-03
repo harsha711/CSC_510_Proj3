@@ -59,8 +59,7 @@ function RestaurantMenu({ restaurant, isOpen, onClose }: RestaurantMenuProps) {
           setError(null);
           
           // Use the restaurant and user_id query parameters to filter dishes
-          // TODO: Replace 'user_default' with actual user ID from auth context
-          const userId = "user_default"; // Placeholder user ID
+          const userId = localStorage.getItem("authToken"); // Placeholder user ID
           const response = await fetch(`${API_BASE_URL}/dishes/?restaurant=${restaurant._id}&user_id=${userId}`);
           
           if (!response.ok) {
