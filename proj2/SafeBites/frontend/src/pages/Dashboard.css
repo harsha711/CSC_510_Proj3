@@ -201,8 +201,21 @@
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: 1.5rem;
-  min-width: 220px;
+  min-width: 280px;
+  max-width: 320px;
   z-index: 200;
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .profile-info {
@@ -224,6 +237,47 @@
   margin: 0;
 }
 
+/* Profile Allergies Section */
+.profile-allergies {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.profile-allergies-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin: 0 0 0.75rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-allergies-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.profile-allergy-tag {
+  padding: 0.35rem 0.75rem;
+  background-color: #fff5f5;
+  color: #e53e3e;
+  border: 1px solid #feb2b2;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.profile-no-allergies {
+  font-size: 0.85rem;
+  color: #999;
+  font-style: italic;
+  margin: 0;
+  text-align: center;
+}
+
 .btn-logout {
   width: 100%;
   padding: 0.75rem;
@@ -234,6 +288,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
+  margin-top: 0;
 }
 
 .btn-logout:hover {

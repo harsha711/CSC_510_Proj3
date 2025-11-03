@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Home from './Home';
@@ -13,14 +13,61 @@ function Dashboard() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
 
-  // Mock user data - replace with actual user data from auth context
-  const user = {
-    fullName: 'John Doe',
-    username: '@johndoe'
+  // User data from API
+  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
+  const [allergies, setAllergies] = useState<string[]>([]);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const authToken = localStorage.getItem('authToken');
+      const storedUsername = localStorage.getItem('username');
+
+      if (!authToken) {
+        // Not logged in, redirect to login
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch('https://safebites-yu1o.onrender.com/users/me', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+
+      const userData = await response.json();
+      console.log('Dashboard - User data:', userData);
+      
+      setUsername(userData.username || storedUsername || 'User');
+      setName(userData.name || 'User');
+      setAllergies(userData.allergen_preferences || []);
+    } catch (error) {
+      console.error('Dashboard - Error fetching user data:', error);
+      // Use fallback data from localStorage
+      const storedUsername = localStorage.getItem('username');
+      if (storedUsername) {
+        setUsername(storedUsername);
+        setName('User');
+      }
+    } finally {
+      setIsLoadingUser(false);
+    }
   };
 
   const handleLogout = () => {
-    // Add any logout logic here (clear tokens, etc.)
+    // Clear auth data
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('username');
     navigate('/login');
   };
 
@@ -81,9 +128,31 @@ function Dashboard() {
             {isProfileOpen && (
               <div className="profile-dropdown">
                 <div className="profile-info">
-                  <p className="profile-fullname">{user.fullName}</p>
-                  <p className="profile-username">{user.username}</p>
+                  <p className="profile-fullname">{name}</p>
+                  <p className="profile-username">@{username}</p>
                 </div>
+
+                {/* Allergen Preferences */}
+                {!isLoadingUser && allergies.length > 0 && (
+                  <div className="profile-allergies">
+                    <p className="profile-allergies-label">Allergies:</p>
+                    <div className="profile-allergies-list">
+                      {allergies.map((allergy, index) => (
+                        <span key={index} className="profile-allergy-tag">
+                          {allergy}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* No allergies message */}
+                {!isLoadingUser && allergies.length === 0 && (
+                  <div className="profile-allergies">
+                    <p className="profile-no-allergies">No allergies set</p>
+                  </div>
+                )}
+                
                 <button 
                   className="btn-logout"
                   onClick={handleLogout}
