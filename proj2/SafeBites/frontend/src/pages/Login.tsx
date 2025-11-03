@@ -37,8 +37,8 @@ function Login() {
             console.log('Login successful:', result);
             
             // Store user token/data in localStorage
-            if (result.token) {
-                localStorage.setItem('authToken', result.token);
+            if (result.access_token) {
+                localStorage.setItem('authToken', result.access_token);
             }
             localStorage.setItem('username', username);
             

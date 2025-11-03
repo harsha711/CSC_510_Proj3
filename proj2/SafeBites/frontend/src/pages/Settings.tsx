@@ -29,6 +29,8 @@ function Settings() {
     try {
       const storedUsername = localStorage.getItem('username');
       const authToken = localStorage.getItem('authToken');
+      console.log('Auth Token:', authToken);
+      console.log('Stored Username:', storedUsername);
 
       if (!storedUsername) {
         alert('Please login first');
