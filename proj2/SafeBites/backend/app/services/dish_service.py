@@ -1,36 +1,104 @@
-from ..db import db
-from bson import ObjectId
-from fastapi import HTTPException
+from app.db import db
+from bson.objectid import ObjectId
+from app.models.exception_model import NotFoundException, BadRequestException, DatabaseException, ConflictException
 
-def _to_out(doc):
+def _to_out(doc: dict) -> dict:
+    if not doc:
+        return doc
     doc["_id"] = str(doc["_id"])
     return doc
 
-async def create_dish(data):
-    doc = data.model_dump()
+def create_dish(dish_create):
+    if not dish_create.name or not dish_create.restaurant:
+        raise BadRequestException(message="Missing required dish fields")
+    # enforce unique dish name per restaurant
+    existing = db.dishes.find_one({"name": dish_create.name, "restaurant": dish_create.restaurant})
+    if existing:
+        raise ConflictException(detail="Dish with same name already exists for this restaurant")
+    doc = dish_create.model_dump()
     doc["availability"] = doc.get("availability", True)
-    res = await db.dishes.insert_one(doc)
-    created = await db.dishes.find_one({"_id": res.inserted_id})
-    return _to_out(created)
+    try:
+        res = db.dishes.insert_one(doc)
+        created = db.dishes.find_one({"_id": res.inserted_id})
+        return _to_out(created)
+    except Exception as e:
+        raise DatabaseException(message=f"Failed to create dish: {e}")
 
-async def list_dishes(filter_query: dict):
-    docs = await db.dishes.find(filter_query).to_list(length=200)
-    return [_to_out(d) for d in docs]
+def list_dishes(filter_query: dict, user_id: str = None):
+    try:
+        docs = list(db.dishes.find(filter_query).limit(100))
+        out = []
+        user_allergens = []
+        if user_id:
+            try:
+                user_doc = db.users.find_one({"_id": ObjectId(user_id)})
+                if user_doc:
+                    user_allergens = [a.lower() for a in user_doc.get("allergen_preferences", [])]
+            except Exception:
+                pass
+        for d in docs:
+            d_out = _to_out(d)
+            # safe_for_user flag
+            if user_allergens:
+                dish_all = [a.lower() for a in d_out.get("explicit_allergens", [])]
+                d_out["safe_for_user"] = len(set(dish_all) & set(user_allergens)) == 0
+            else:
+                d_out["safe_for_user"] = None
+            out.append(d_out)
+        return out
+    except Exception as e:
+        raise DatabaseException(message=f"Failed to list dishes: {e}")
 
-async def get_dish(dish_id: str):
-    doc = await db.dishes.find_one({"_id": ObjectId(dish_id)})
+def get_dish(dish_id: str, user_id: str = None):
+    try:
+        obj = ObjectId(dish_id)
+    except Exception:
+        raise NotFoundException(name="Invalid dish id")
+    doc = db.dishes.find_one({"_id": obj})
     if not doc:
-        raise HTTPException(status_code=404, detail="Dish not found")
-    return _to_out(doc)
+        raise NotFoundException(name="Dish not found")
+    d_out = _to_out(doc)
+    if user_id:
+        try:
+            user_doc = db.users.find_one({"_id": ObjectId(user_id)})
+            user_allergens = [a.lower() for a in user_doc.get("allergen_preferences", [])] if user_doc else []
+            dish_all = [a.lower() for a in d_out.get("explicit_allergens", [])]
+            d_out["safe_for_user"] = len(set(dish_all) & set(user_allergens)) == 0
+        except Exception:
+            d_out["safe_for_user"] = None
+    else:
+        d_out["safe_for_user"] = None
+    return d_out
 
-async def update_dish(dish_id: str, update_data: dict):
-    res = await db.dishes.update_one({"_id": ObjectId(dish_id)}, {"$set": update_data})
+def update_dish(dish_id: str, update_data: dict):
+    if not update_data:
+        raise BadRequestException(message="No fields to update")
+    try:
+        obj = ObjectId(dish_id)
+    except Exception:
+        raise NotFoundException(name="Invalid dish id")
+    # If changing name/restaurant, ensure uniqueness
+    if "name" in update_data or "restaurant" in update_data:
+        current = db.dishes.find_one({"_id": obj})
+        if not current:
+            raise NotFoundException(name="Dish not found")
+        new_name = update_data.get("name", current.get("name"))
+        new_rest = update_data.get("restaurant", current.get("restaurant"))
+        other = db.dishes.find_one({"name": new_name, "restaurant": new_rest, "_id": {"$ne": obj}})
+        if other:
+            raise ConflictException(detail="Another dish with same name exists in the restaurant")
+    res = db.dishes.update_one({"_id": obj}, {"$set": update_data})
     if res.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Dish not found")
-    updated = await db.dishes.find_one({"_id": ObjectId(dish_id)})
+        raise NotFoundException(name="Dish not found")
+    updated = db.dishes.find_one({"_id": obj})
     return _to_out(updated)
 
-async def delete_dish(dish_id: str):
-    res = await db.dishes.delete_one({"_id": ObjectId(dish_id)})
+def delete_dish(dish_id: str):
+    try:
+        obj = ObjectId(dish_id)
+    except Exception:
+        raise NotFoundException(name="Invalid dish id")
+    res = db.dishes.delete_one({"_id": obj})
     if res.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Dish not found")
+        raise NotFoundException(name="Dish not found")
+    return

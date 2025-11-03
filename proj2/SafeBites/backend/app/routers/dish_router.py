@@ -1,43 +1,50 @@
-"""
-DISH ROUTER
-APIs implemented:
-1. POST   /dishes/               → Create a new dish
-2. GET    /dishes/{dish_id}      → Get dish by ID
-3. GET    /dishes/               → Get all dishes
-4. PUT    /dishes/{dish_id}      → Update a dish
-5. DELETE /dishes/{dish_id}      → Delete a dish
-"""
-
-from fastapi import APIRouter, HTTPException, Query
+# backend/app/routers/dish_router.py
+from fastapi import APIRouter, Query
 from typing import Optional, List
-from ..models.dish_model import DishCreate, DishUpdate, DishOut
-from ..services import dish_service
+from app.models.dish_model import DishCreate, DishUpdate, DishOut
+from app.services import dish_service
 
 router = APIRouter(prefix="/dishes", tags=["dishes"])
 
 @router.post("/", response_model=DishOut, status_code=201)
-async def create_dish(payload: DishCreate):
-    return await dish_service.create_dish(payload)
+def create_dish(payload: DishCreate):
+    return dish_service.create_dish(payload)
 
 @router.get("/", response_model=List[DishOut])
-async def list_dishes(restaurant: Optional[str] = None, tags: Optional[str] = Query(None)):
+def list_dishes(restaurant: Optional[str] = None, tags: Optional[str] = Query(None), user_id: Optional[str] = None):
     query = {}
     if restaurant:
         query["restaurant"] = restaurant
     if tags:
         query["ingredients"] = {"$in": tags.split(",")}
-    return await dish_service.list_dishes(query)
+    return dish_service.list_dishes(query, user_id=user_id)
+
+@router.get("/filter", response_model=List[DishOut])
+def filter_dishes(exclude_allergens: Optional[str] = Query(None), restaurant: Optional[str] = None, user_id: Optional[str] = None):
+    query = {}
+    if restaurant:
+        query["restaurant"] = restaurant
+    docs = dish_service.list_dishes(query, user_id=user_id)
+    if not exclude_allergens:
+        return docs
+    exclude_list = [a.strip().lower() for a in exclude_allergens.split(",") if a.strip()]
+    safe = []
+    for d in docs:
+        dish_all = [a.lower() for a in d.get("explicit_allergens", [])]
+        if not set(dish_all) & set(exclude_list):
+            safe.append(d)
+    return safe
 
 @router.get("/{dish_id}", response_model=DishOut)
-async def get_dish(dish_id: str):
-    return await dish_service.get_dish(dish_id)
+def get_dish(dish_id: str, user_id: Optional[str] = None):
+    return dish_service.get_dish(dish_id, user_id=user_id)
 
 @router.put("/{dish_id}", response_model=DishOut)
-async def update_dish(dish_id: str, payload: DishUpdate):
+def update_dish(dish_id: str, payload: DishUpdate):
     data = {k: v for k, v in payload.model_dump().items() if v is not None}
-    return await dish_service.update_dish(dish_id, data)
+    return dish_service.update_dish(dish_id, data)
 
 @router.delete("/{dish_id}")
-async def delete_dish(dish_id: str):
-    await dish_service.delete_dish(dish_id)
+def delete_dish(dish_id: str):
+    dish_service.delete_dish(dish_id)
     return {"detail": "deleted"}
