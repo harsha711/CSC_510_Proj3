@@ -115,6 +115,59 @@
   transform: translateY(0);
 }
 
+.signup-btn:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.signup-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Allergens Section */
+.allergens-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.allergen-description {
+  color: #999;
+  font-size: 0.85rem;
+  margin: -0.25rem 0 0.75rem 0;
+}
+
+.allergen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.allergen-btn {
+  padding: 0.75rem 1rem;
+  background-color: #f7fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.allergen-btn:hover {
+  border-color: #ff6b6b;
+  background-color: #fff5f5;
+}
+
+.allergen-btn.selected {
+  background-color: #ff6b6b;
+  color: white;
+  border-color: #ff5252;
+}
+
 /* Login Prompt */
 .login-prompt {
   margin-top: 2rem;

@@ -1,22 +1,71 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Settings.css';
 
 function Settings() {
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Mock user data
-  const [username, setUsername] = useState('johndoe');
-  const [fullName] = useState('John Doe');
+  // User data from API
+  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
   const [joinDate] = useState('January 2025');
-  const [allergies, setAllergies] = useState<string[]>(['Peanuts', 'Shellfish']);
+  const [allergies, setAllergies] = useState<string[]>([]);
   const [newAllergy, setNewAllergy] = useState('');
 
   // Temporary states for editing
-  const [tempUsername, setTempUsername] = useState(username);
+  const [tempUsername, setTempUsername] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const storedUsername = localStorage.getItem('username');
+      const authToken = localStorage.getItem('authToken');
+      console.log('Auth Token:', authToken);
+      console.log('Stored Username:', storedUsername);
+
+      if (!storedUsername) {
+        alert('Please login first');
+        return;
+      }
+
+      const response = await fetch('https://safebites-yu1o.onrender.com/users/me', {
+        headers: {
+          'Authorization': `Bearer ${authToken || 'token'}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+
+      const userData = await response.json();
+      console.log('User data:', userData);
+      
+      setUsername(userData.username || storedUsername);
+      setName(userData.name || 'User');
+      setTempUsername(userData.username || storedUsername);
+      setAllergies(userData.allergen_preferences || []);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      // Use fallback data from localStorage
+      const storedUsername = localStorage.getItem('username');
+      if (storedUsername) {
+        setUsername(storedUsername);
+        setTempUsername(storedUsername);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSaveUsername = () => {
     setUsername(tempUsername);
@@ -54,13 +103,55 @@ function Settings() {
       alert('This allergy is already in your list');
       return;
     }
-    setAllergies([...allergies, newAllergy.trim()]);
+    const updatedAllergies = [...allergies, newAllergy.trim()];
+    setAllergies(updatedAllergies);
     setNewAllergy('');
+    updateUserAllergies(updatedAllergies);
   };
 
   const handleRemoveAllergy = (allergyToRemove: string) => {
-    setAllergies(allergies.filter(allergy => allergy !== allergyToRemove));
+    const updatedAllergies = allergies.filter(allergy => allergy !== allergyToRemove);
+    setAllergies(updatedAllergies);
+    updateUserAllergies(updatedAllergies);
   };
+
+  const updateUserAllergies = async (updatedAllergies: string[]) => {
+    setIsSaving(true);
+    try {
+      const authToken = localStorage.getItem('authToken');
+      
+      const response = await fetch('https://safebites-yu1o.onrender.com/users/me', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken || 'token'}`
+        },
+        body: JSON.stringify({
+          name: name,
+          allergen_preferences: updatedAllergies
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update allergies');
+      }
+
+      console.log('Allergies updated successfully');
+    } catch (error) {
+      console.error('Error updating allergies:', error);
+      alert('Failed to save allergies. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="settings-container">
+        <div className="loading-message">Loading your settings...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="settings-container">
@@ -80,7 +171,8 @@ function Settings() {
               <img src="/icons/hugeicons_male.png" alt="Profile" />
             </div>
             <div className="settings-basic-info">
-              <h3>{fullName}</h3>
+              <h3>{name}</h3>
+              <p className="settings-join-date">@{username}</p>
               <p className="settings-join-date">Member since {joinDate}</p>
             </div>
           </div>
@@ -177,6 +269,7 @@ function Settings() {
         <div className="section-header">
           <h2>Dietary Restrictions</h2>
           <p className="section-description">Manage your food allergies and restrictions</p>
+          {isSaving && <span className="saving-indicator">Saving...</span>}
         </div>
 
         <div className="settings-card">

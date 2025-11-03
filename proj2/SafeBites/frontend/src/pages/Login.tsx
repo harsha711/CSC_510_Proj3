@@ -4,13 +4,53 @@ import './Login.css';
 
 function Login() {
     const navigate = useNavigate();
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Add authentication logic here
-        navigate('/dashboard');
+        
+        setIsSubmitting(true);
+
+        try {
+            const response = await fetch(`https://safebites-yu1o.onrender.com/users/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, {
+                method: 'POST',
+            });
+
+            const responseText = await response.text();
+            console.log('Login Response Status:', response.status);
+            console.log('Login Response:', responseText);
+
+            if (!response.ok) {
+                let errorMessage = 'Failed to login';
+                try {
+                    const errorData = JSON.parse(responseText);
+                    errorMessage = errorData.detail || errorData.message || responseText;
+                } catch {
+                    errorMessage = responseText || `HTTP Error ${response.status}`;
+                }
+                throw new Error(errorMessage);
+            }
+
+            const result = JSON.parse(responseText);
+            console.log('Login successful:', result);
+            
+            // Store user token/data in localStorage
+            if (result.access_token) {
+                localStorage.setItem('authToken', result.access_token);
+            }
+            localStorage.setItem('username', username);
+            
+            alert('Login successful!');
+            navigate('/dashboard');
+        } catch (error) {
+            console.error('Error logging in:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+            alert(`Failed to login: ${errorMessage}`);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -53,14 +93,14 @@ function Login() {
 
                     <a href="#" className="forgot-password">Forgot Password?</a>
 
-                    <button type="submit" className="login-btn">
-                        Login
+                    <button type="submit" className="login-btn" disabled={isSubmitting}>
+                        {isSubmitting ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
 
                 {/* Sign Up Link */}
                 <div className="signup-prompt">
-                    <p>Don't have an account? <a href="#" onClick={() => navigate('/signup')}>Sign Up</a></p>
+                    <p>Don't have an account? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/signup'); }}>Sign Up</a></p>
                 </div>
             </div>
         </div>
