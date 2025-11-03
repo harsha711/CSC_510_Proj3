@@ -27,4 +27,5 @@ class DishOut(BaseModel):
     price: float
     explicit_allergens: List[str] = Field(default_factory=list)
     availability: bool = True
-    safe_for_user: Optional[bool] = None
+    # ALWAYS boolean now
+    safe_for_user: bool
