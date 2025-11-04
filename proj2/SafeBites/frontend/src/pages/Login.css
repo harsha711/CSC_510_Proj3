@@ -130,6 +130,17 @@
   transform: translateY(0);
 }
 
+.login-btn:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 /* Sign Up Prompt */
 .signup-prompt {
   margin-top: 2rem;

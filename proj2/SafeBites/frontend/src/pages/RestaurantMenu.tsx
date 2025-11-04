@@ -29,6 +29,7 @@ interface Dish {
   };
   availaibility?: boolean; // Note: Using their spelling from the API
   serving_size?: string;
+  safe_for_user?: boolean; // Safety indicator based on user's allergen preferences
 }
 
 interface RestaurantMenuProps {
@@ -58,8 +59,9 @@ function RestaurantMenu({ restaurant, isOpen, onClose }: RestaurantMenuProps) {
           setIsLoading(true);
           setError(null);
           
-          // Use the restaurant query parameter to filter dishes
-          const response = await fetch(`${API_BASE_URL}/dishes/?restaurant=${restaurant._id}`);
+          // Use the restaurant and user_id query parameters to filter dishes
+          const userId = localStorage.getItem("authToken"); // Placeholder user ID
+          const response = await fetch(`${API_BASE_URL}/dishes/?restaurant=${restaurant._id}&user_id=${userId}`);
           
           if (!response.ok) {
             throw new Error(`Failed to fetch dishes: ${response.status}`);
@@ -132,10 +134,24 @@ function RestaurantMenu({ restaurant, isOpen, onClose }: RestaurantMenuProps) {
               dishes.map((dish, index) => (
                 <div 
                   key={dish._id} 
-                  className={`dish-item ${index % 2 === 0 ? 'highlighted' : ''}`}
+                  className={`dish-item ${index % 2 === 0 ? 'highlighted' : ''} ${
+                    dish.safe_for_user !== undefined 
+                      ? dish.safe_for_user 
+                        ? 'dish-safe' 
+                        : 'dish-unsafe' 
+                      : ''
+                  }`}
                 >
                   <div className="dish-header">
-                    <h4 className="dish-name">{dish.name}</h4>
+                    <div className="dish-title-container">
+                      <h4 className="dish-name">{dish.name}</h4>
+                      {/* Safety Badge */}
+                      {dish.safe_for_user !== undefined && (
+                        <span className={`safety-badge ${dish.safe_for_user ? 'safe' : 'unsafe'}`}>
+                          {dish.safe_for_user ? '✓ Safe for You' : '⚠ May Contain Allergens'}
+                        </span>
+                      )}
+                    </div>
                     <div className="dish-header-right">
                       <span className="dish-price">${dish.price.toFixed(2)}</span>
                       {/* Availability Badge */}
