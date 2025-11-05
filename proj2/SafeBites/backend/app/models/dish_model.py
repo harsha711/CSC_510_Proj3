@@ -17,14 +17,16 @@ class DishCreate(BaseModel):
     availability: Optional[bool] = True
 
 class DishUpdate(BaseModel):
-    restaurant_id: str
-    name: Optional[str]
-    description: Optional[str]
-    ingredients: Optional[List[str]]
-    price: Optional[float]
-    explicit_allergens: Optional[List[Union[str, AllergenInfo]]]
-    nutrition_facts : Optional[Dict[str, Any]] = None
-    availability: Optional[bool]
+    restaurant_id: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    ingredients: Optional[List[str]] = None
+    price: Optional[float] = None
+    explicit_allergens: Optional[List[Union[str, AllergenInfo]]] = None
+    nutrition_facts: Optional[Dict[str, Any]] = None
+    availability: Optional[bool] = None
+
+
 
 class DishOut(BaseModel):
     id: str = Field(..., alias="_id")
@@ -36,4 +38,5 @@ class DishOut(BaseModel):
     explicit_allergens: Optional[List[Union[str, AllergenInfo]]] = []
     nutrition_facts : Optional[Dict[str, Any]] = None
     availability: bool = True
-    safe_for_user:bool = True
+    # ALWAYS boolean now
+    safe_for_user: bool
