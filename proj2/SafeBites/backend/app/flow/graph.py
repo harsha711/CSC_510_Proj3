@@ -9,37 +9,11 @@ from ..services.response_synthesizer_tool import format_final_response
 from ..services.context_resolver import resolve_context
 
 logger = logging.getLogger(__name__)
-# def route_branches_debugger(state):
-#     print("DEBUG: state type = ",type(state))
-#     print("DEBUG: state.intents = ", state.intents)
-
-#     for idx, intent in enumerate(state.intents):
-#         print(f"Intent {idx}: type = {intent.get('type')}, full = {intent}")
-#     return state
 
 def generate_query_parts(state):
-    # logging.debug(f"Printing generated query parts : {state.intents}")
-    # for item in state.intents:
-    #     state.query_parts.setdefault(item["type"],[]).append(item["query"])
-    # return state
     for item in state.intents.intents:
         state.query_parts.setdefault(item.type, []).append(item.query)
     
-    return state
-
-def route_to_menu_search(state):
-    if state.query_parts.get("menu_search"):
-        return "menu_retriever"
-    return "last_node"
-
-def route_to_dish_info(state):
-    if state.query_parts.get("dish_info"):
-        return "informative_retriever"
-    return "last_node"
-
-
-def last_node(state):
-    logging.debug(f"Logging generated state {state}")
     return state
 
 def create_chat_graph():

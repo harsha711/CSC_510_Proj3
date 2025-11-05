@@ -24,6 +24,7 @@ Please read the following guidelines carefully before contributing.
 ## 🏁 Getting Started
 
 Before contributing, make sure you have:
+
 - Read the [README.md](../README.md)
 - Installed all prerequisites (Python, Node.js, MongoDB)
 - Set up `.env` files using `.env.example`
@@ -35,24 +36,26 @@ Once everything runs locally, you’re ready to contribute 🚀
 
 ## 📂 Project Structure
 
+```plaintext
 food-delivery-system/
-├── backend/ # FastAPI + LangChain + MongoDB
-│ ├── app/
-│ ├── tests/
-│ └── requirements.txt
-├── frontend/ # React + Tailwind app
-│ ├── src/
-│ └── package.json
-└── docs/ # Documentation (this folder)
-
-yaml
+├── backend/       # FastAPI + LangChain + MongoDB
+│   ├── app/       # Application modules (routes, models, services)
+│   ├── tests/     # Backend test cases
+│   └── requirements.txt  # Backend dependencies
+├── frontend/      # React + Tailwind app
+│   ├── src/       # Source code for React app
+│   └── package.json  # Frontend dependencies
+└── docs/          # Documentation (self-assessment, API docs, poster)
+```
 
 ---
 
 ## ⚙️ Setting Up the Environment
 
 Follow the setup steps in the [README.md](../README.md) for detailed backend and frontend setup.  
-Ensure both are running before creating new features.
+
+✅ Make sure both backend and frontend servers are running before creating new features.
+
 
 ---
 
@@ -60,19 +63,19 @@ Ensure both are running before creating new features.
 
 We follow the **feature-branch workflow**:
 
-```bash
-git checkout -b feature/<your-feature-name>
-Branch Naming Convention
-Type	Example	Description
-feature/	feature/add-recommendation-module	For new features
-fix/	fix/mongodb-connection-error	For bug fixes
-refactor/	refactor/vector-service	For improving existing code
-docs/	docs/update-readme	For documentation updates
+### Branch Naming Convention
 
-Typical Flow
-bash
-Copy code
-# Create branch
+| Type      | Example                          | Description                     |
+|----------|----------------------------------|---------------------------------|
+| feature/ | feature/add-recommendation-module | For new features                |
+| fix/     | fix/mongodb-connection-error      | For bug fixes                   |
+| refactor/| refactor/vector-service           | For improving existing code     |
+| docs/    | docs/update-readme               | For documentation updates       |
+
+### Typical Flow
+
+```bash
+# Create a feature branch
 git checkout -b feature/add-user-api
 
 # Commit changes
@@ -81,87 +84,85 @@ git commit -m "feat: add new user creation API"
 
 # Push branch
 git push origin feature/add-user-api
-📝 Commit Message Convention
-We follow the Conventional Commits format:
+```
+## 📝 Commit Message Convention
 
-cpp
-Copy code
-<type>(optional scope): <short summary>
-Type	Meaning
-feat	New feature
-fix	Bug fix
-docs	Documentation update
-style	Code style changes (no logic)
-refactor	Code restructuring
-test	Adding or updating tests
-chore	Maintenance tasks
+We follow the **Conventional Commits** format:
 
-Examples:
+### Commit Types
 
-feat(api): add metadata filtering endpoint
+| Type      | Meaning                       |
+|-----------|-------------------------------|
+| feat      | New feature                   |
+| fix       | Bug fix                       |
+| docs      | Documentation update          |
+| style     | Code style changes (no logic) |
+| refactor  | Code restructuring            |
+| test      | Adding or updating tests      |
+| chore     | Maintenance tasks             |
 
-fix(db): resolve MongoDB schema mismatch
+### Examples
 
+feat(api): add metadata filtering endpoint  
+fix(db): resolve MongoDB schema mismatch  
 refactor(vector): optimize FAISS index lookup
 
-🔄 Pull Request Guidelines
-Make sure all your commits follow the convention above.
+## 🔄 Pull Request Guidelines
 
-Ensure code builds and passes tests before submitting.
+- Make sure all your commits follow the **Conventional Commits** format.
+- Ensure code builds and passes tests before submitting.
+- Keep PRs focused — one feature or fix per PR.
+- Include a brief description of what your PR does.
+- Link any related issues or discussions.
 
-Keep PRs focused — one feature or fix per PR.
-
-Include a brief description of what your PR does.
-
-Link any related issues or discussions.
-
-PR Title Example:
-
-scss
-Copy code
+### PR Title Example
 feat(frontend): implement restaurant search component
-💅 Code Style & Best Practices
-Python (Backend)
-Follow PEP8 style guide.
 
-Use descriptive variable names.
+## 💅 Code Style & Best Practices
 
-Add docstrings for functions and services.
+### Python (Backend)
+- Follow PEP8 style guide.
+- Use descriptive variable names.
+- Add docstrings for functions and services.
+- Keep modules modular — separate routes, models, and services.
 
-Keep modules modular — separate routes, models, and services.
+### JavaScript/React (Frontend)
+- Use functional components.
+- Follow ESLint + Prettier formatting.
+- Keep components small and reusable.
+- Use consistent naming:
+  - `camelCase` for variables
+  - `PascalCase` for components
 
-JavaScript/React (Frontend)
-Use functional components.
 
-Follow ESLint + Prettier formatting.
+## 🧪 Testing
 
-Keep components small and reusable.
-
-Use consistent naming: camelCase for variables, PascalCase for components.
-
-🧪 Testing
+### Backend
 Run all backend tests before submitting a PR:
 
-bash
+```
 Copy code
 cd backend
 pytest
+```
+
+### Frontend
 For frontend testing (if added):
 
-bash
-Copy code
+```
 cd frontend
 npm test
+```
 ✅ All tests must pass before your PR is merged.
 
-🐛 Reporting Issues
-Found a bug or have a feature request?
+## 🐛 Reporting Issues
+
+Found a bug or have a feature request?  
 Create a detailed issue using the format below:
 
-Issue Template
+### Issue Template
 
-shell
-Copy code
+```markdown
 ### Description
 Briefly describe the problem.
 
@@ -174,13 +175,11 @@ What should happen?
 
 ### Environment
 OS, Python version, Node version, etc.
+```
 ❤️ Thank You!
 Your contributions make this project better for everyone.
 We appreciate every PR, issue, and idea shared 🙌
 
 — The SafeBites Dev Team
-
-yaml
-Copy code
 
 ---
