@@ -1,14 +1,4 @@
-"""
-DISH ROUTER
-APIs implemented:
-1. POST   /dishes/               → Create a new dish
-2. GET    /dishes/{dish_id}      → Get dish by ID
-3. GET    /dishes/               → Get all dishes
-4. PUT    /dishes/{dish_id}      → Update a dish
-5. DELETE /dishes/{dish_id}      → Delete a dish
-"""
-
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 from typing import Optional, List
 from ..models.dish_model import DishCreate, DishUpdate, DishOut
 from ..services import dish_service
@@ -21,7 +11,14 @@ def create_dish(restaurant_id:str, payload: DishCreate):
     return dish_service.create_dish(restaurant_id, payload)
 
 @router.get("/", response_model=List[DishOut])
-def list_dishes(restaurant: Optional[str] = None, tags: Optional[str] = Query(None), user_id: Optional[str] = None):
+def list_dishes(
+    restaurant: Optional[str] = None,
+    tags: Optional[str] = Query(None),
+    user_id: Optional[str] = None
+):
+    """
+    Returns all dishes and ALWAYS includes safe_for_user (True/False).
+    """
     query = {}
     if restaurant:
         query["restaurant_id"] = restaurant
@@ -30,13 +27,19 @@ def list_dishes(restaurant: Optional[str] = None, tags: Optional[str] = Query(No
     return dish_service.list_dishes(query, user_id=user_id)
 
 @router.get("/filter", response_model=List[DishOut])
-def filter_dishes(exclude_allergens: Optional[str] = Query(None), restaurant: Optional[str] = None, user_id: Optional[str] = None):
+def filter_dishes(
+    exclude_allergens: Optional[str] = Query(None),
+    restaurant: Optional[str] = None,
+    user_id: Optional[str] = None
+):
     query = {}
     if restaurant:
         query["restaurant_id"] = restaurant
     docs = dish_service.list_dishes(query, user_id=user_id)
+
     if not exclude_allergens:
         return docs
+
     exclude_list = [a.strip().lower() for a in exclude_allergens.split(",") if a.strip()]
     safe = []
     for d in docs:
