@@ -134,6 +134,20 @@ To view coverage:
 
 pytest --cov=app
 ```
+To run frontend tests:
+```
+Runs all tests:
+npm run test
+
+Runs SPECIFIC test file:
+npm run test [filename].test
+
+Runs tests in WATCH mode (re-runs on file changes):
+npm run test -- --watch
+
+Runs tests with COVERAGE:
+npm run test -- --coverage
+```
 
 ## 🤝 Contributing  
 
