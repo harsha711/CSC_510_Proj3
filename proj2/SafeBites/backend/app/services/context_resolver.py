@@ -13,6 +13,7 @@ import os, json
 import logging
 from dotenv import load_dotenv
 from ..utils.llm_tracker import LLMUsageTracker
+from .exception_service import BadRequestException, GenericException
 
 logger = logging.getLogger(__name__)
 
@@ -52,50 +53,62 @@ def resolve_context(state):
         Exception: Propagates any LLM invocation or API errors.
     """
     logger.debug(f"Resolving context for state: {state}")
-    prompt_template = ChatPromptTemplate.from_template("""
-You are a context resolver for a food delivery assistant.
-Your job is to interpret the current user query in the context of prior conversation.
+    if not getattr(state, "query", None):
+        raise BadRequestException("Missing user query in state.")
+    try:
+        prompt_template = ChatPromptTemplate.from_template("""
+    You are a context resolver for a food delivery assistant.
+    Your job is to interpret the current user query in the context of prior conversation.
 
-User query: {query}
+    User query: {query}
 
-Previous Context : 
-{context}
+    Previous Context : 
+    {context}
 
-If the user query refers to something previously mentioned (e.g., "that", "those", "it"),
-resolve what it refers to using the most relevant prior results.
+    If the user query refers to something previously mentioned (e.g., "that", "those", "it"),
+    resolve what it refers to using the most relevant prior results.
 
-Return only the rewritten query text.
-""")
-    
-    response = llm.invoke(prompt_template.format_messages(
-        query=state.query,
-        context=state.context or {}
-    ))
-    logger.debug("Rewritten Query:", response.content)
-    # return {"query": response.content.strip()}
+    Return only the rewritten query text.
+    """)
+        
+        response = llm.invoke(prompt_template.format_messages(
+            query=state.query,
+            context=state.context or {}
+        ))
+        logger.debug("Rewritten Query:", response.content)
+        # return {"query": response.content.strip()}
 
-    rewritten_query = response.content.strip().strip()
+        rewritten_query = response.content.strip().strip()
 
-    context_summary_prompt = ChatPromptTemplate.from_template("""
-You are summarizing conversation context for another LLM.
-Given the following context, extract only relevant information that might help answer the query below.
+        if not rewritten_query:
+            raise GenericException("LLM returned an empty rewritten query.")
 
-Context: {context}
-Query: {query}
+        context_summary_prompt = ChatPromptTemplate.from_template("""
+    You are summarizing conversation context for another LLM.
+    Given the following context, extract only relevant information that might help answer the query below.
 
-Return a short, factual summary (under 300 words) describing relevant dishes, filters, or results.
-""")
-    
-    summary_response = llm.invoke(context_summary_prompt.format_messages(
-        context=state.context or {},
-        query=rewritten_query
-    ))
+    Context: {context}
+    Query: {query}
 
-    current_context = summary_response.content.strip()
+    Return a short, factual summary (under 300 words) describing relevant dishes, filters, or results.
+    """)
+        
+        summary_response = llm.invoke(context_summary_prompt.format_messages(
+            context=state.context or {},
+            query=rewritten_query
+        ))
 
-    logger.debug(f"Resolved Context Response: {current_context}")
+        current_context = summary_response.content.strip()
 
-    return {
-        "query": rewritten_query,
-        "current_context": current_context
-    }
+        logger.debug(f"Resolved Context Response: {current_context}")
+
+        return {
+            "query": rewritten_query,
+            "current_context": current_context
+        }
+    except (json.JSONDecoderError, TypeError) as e:
+        logger.error("Data parsing error during context resolution....")
+        raise BadRequestException(f"Invalid data format : {e}")
+    except Exception as e:
+        logger.error("Unexpected error in context resolver....")
+        raise GenericException(f"Unexpected error : {e}")

@@ -90,7 +90,7 @@ def list_dishes(filter_query: dict, user_id: str = None):
 
         for d in docs:
             d_out = _to_out(d)
-            dish_all = [a.lower() for a in d_out.get("explicit_allergens", [])]
+            dish_all = [a["allergen"].lower() for a in d_out.get("explicit_allergens", [])]
 
             if user_allergens:
                 d_out["safe_for_user"] = len(set(dish_all) & set(user_allergens)) == 0
@@ -127,7 +127,7 @@ def get_dish(dish_id: str, user_id: str = None):
         raise NotFoundException(name="Dish not found")
 
     d_out = _to_out(doc)
-    dish_all = [a.lower() for a in d_out.get("explicit_allergens", [])]
+    dish_all = [a["allergen"].lower() for a in d_out.get("explicit_allergens", [])]
 
     if user_id:
         try:

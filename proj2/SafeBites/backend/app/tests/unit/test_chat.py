@@ -8,13 +8,13 @@ from app.flow.state import ChatState
 from app.models.intent_model import IntentQuery, IntentExtractionResult
 from app.models.dish_info_model import DishData
 from app.services import intent_service, restaurant_service
+from app.services.context_resolver import resolve_context
 from app.services.intent_service import extract_query_intent
 from app.services.faiss_service import extract_query_intent as faiss_extract_query_intent, search_dishes
 from app.services.dish_info_service import get_dish_info
 from app.services.restaurant_service import apply_filters, validate_retrieved_dishes
 from app.services.faiss_service import refine_with_centroid
-from app.models.exception_model import GenericException
-
+from app.models.exception_model import GenericException,BadRequestException
 
 @pytest.fixture
 def sample_chat_state():
@@ -448,3 +448,43 @@ def test_apply_filters_invalid_json(mock_llm,sample_dish_data):
     mock_llm.return_value = SimpleNamespace(content="Not a JSON")
     with pytest.raises(GenericException):
         apply_filters("some query",sample_dish_data)
+
+
+@pytest.mark.unit
+@patch("app.services.context_resolver.llm")
+def test_resolve_context_success(mock_llm):
+    mock_rewrite = MagicMock()
+    mock_rewrite.content = "Tell me about creamy mushroom pasta"
+    mock_summary = MagicMock()
+    mock_summary.content = "User previously viewed creamy mushroom pasta and chicken alfredo dishes."
+    mock_llm.invoke.side_effect = [mock_rewrite, mock_summary]
+
+    state = ChatState(query="What about that pasta??",context={"previous_dishes":["mushroom pasta","alfredo"]})
+    result = resolve_context(state)
+
+    assert isinstance(result, dict)
+    assert "query" in result
+    assert "current_context" in result
+    assert "mushroom_pasta" in result["query"]
+    assert "alfredo" in result["current_context"]
+
+@pytest.mark.unit
+def test_resolve_context_missing_query():
+    state = ChatState(query=None)
+    with pytest.raises(BadRequestException) as exc:
+        resolve_context(state)
+    assert "Missing user query" in str(exc.value)
+
+@pytest.mark.unit
+@patch("app.services.context_resolver.llm")
+def test_resolve_context_empty_llm_response(mock_llm):
+    mock_response = MagicMock()
+    mock_response.content = ""
+    mock_llm.invoke.return_value = mock_response
+    state = ChatState(query="Show me that dish",context={})
+    with pytest.raises(GenericException) as exc:
+        resolve_context(state)
+    assert "empty rewritten query" in str(exc.value)
+
+@pytest.mark.unit
+@patch()
