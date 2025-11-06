@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main,chat-doc/merged-chat-doc-branch ]
     paths:
-      - 'PROJ2/SafeBites/backend/**'
+      - 'proj2/SafeBites/backend/**'
       - '.github/workflows/**'
 
 jobs:
