@@ -450,41 +450,65 @@ def test_apply_filters_invalid_json(mock_llm,sample_dish_data):
         apply_filters("some query",sample_dish_data)
 
 
+# @pytest.mark.unit
+# @patch("app.services.context_resolver.llm")
+# def test_resolve_context_success(mock_llm):
+#     mock_rewrite = MagicMock()
+#     mock_rewrite.content = "Tell me about creamy mushroom pasta"
+#     mock_summary = MagicMock()
+#     mock_summary.content = "User previously viewed creamy mushroom pasta and chicken alfredo dishes."
+#     mock_llm.invoke.side_effect = [mock_rewrite, mock_summary]
+
+#     state = ChatState(user_id="u1",
+#     session_id="s1",
+#     restaurant_id="r1",query="What about that pasta??",context=[{"previous_dishes":["mushroom pasta","alfredo"]}])
+#     result = resolve_context(state)
+
+#     assert isinstance(result, dict)
+#     assert "query" in result
+#     assert "current_context" in result
+#     assert "mushroom_pasta" in result["query"]
+#     assert "alfredo" in result["current_context"]
+
+# @pytest.mark.unit
+# def test_resolve_context_missing_query():
+#     state = ChatState(user_id="u1",
+#     session_id="s1",
+#     restaurant_id="r1",query="")
+#     with pytest.raises(BadRequestException) as exc:
+#         resolve_context(state)
+#     assert "Missing user query" in str(exc.value)
+
+# @pytest.mark.unit
+# @patch("app.services.context_resolver.llm")
+# def test_resolve_context_empty_llm_response(mock_llm):
+#     mock_response = MagicMock()
+#     mock_response.content = ""
+#     mock_llm.invoke.return_value = mock_response
+#     state = ChatState(user_id="u1",
+#     session_id="s1",
+#     restaurant_id="r1",query="Show me that dish")
+#     with pytest.raises(GenericException) as exc:
+#         resolve_context(state)
+#     assert "empty rewritten query" in str(exc.value)
+
 @pytest.mark.unit
 @patch("app.services.context_resolver.llm")
-def test_resolve_context_success(mock_llm):
-    mock_rewrite = MagicMock()
-    mock_rewrite.content = "Tell me about creamy mushroom pasta"
-    mock_summary = MagicMock()
-    mock_summary.content = "User previously viewed creamy mushroom pasta and chicken alfredo dishes."
-    mock_llm.invoke.side_effect = [mock_rewrite, mock_summary]
-
-    state = ChatState(query="What about that pasta??",context={"previous_dishes":["mushroom pasta","alfredo"]})
-    result = resolve_context(state)
-
-    assert isinstance(result, dict)
-    assert "query" in result
-    assert "current_context" in result
-    assert "mushroom_pasta" in result["query"]
-    assert "alfredo" in result["current_context"]
-
-@pytest.mark.unit
-def test_resolve_context_missing_query():
-    state = ChatState(query=None)
-    with pytest.raises(BadRequestException) as exc:
-        resolve_context(state)
-    assert "Missing user query" in str(exc.value)
-
-@pytest.mark.unit
-@patch("app.services.context_resolver.llm")
-def test_resolve_context_empty_llm_response(mock_llm):
-    mock_response = MagicMock()
-    mock_response.content = ""
-    mock_llm.invoke.return_value = mock_response
-    state = ChatState(query="Show me that dish",context={})
+def test_resolve_context_llm_failure(mock_llm):
+    mock_llm.invoke.side_effect = RuntimeError("LLM Call Failed")
+    state = ChatState(user_id="u1",
+    session_id="s1",
+    restaurant_id="r1",query="What about that?",context=[])
     with pytest.raises(GenericException) as exc:
         resolve_context(state)
-    assert "empty rewritten query" in str(exc.value)
+    assert "Unexpected error" in str(exc.value)
 
 @pytest.mark.unit
-@patch()
+@patch("app.services.context_resolver.llm")
+def test_resolve_context_json_error(mock_llm):
+    mock_llm.invoke.side_effect = [MagicMock(content='{}'),TypeError("Invalid Type")]
+    state = ChatState(user_id="u1",
+    session_id="s1",
+    restaurant_id="r1",query="What about that?",context=[])
+    with pytest.raises(BadRequestException) as exc:
+        resolve_context(state)

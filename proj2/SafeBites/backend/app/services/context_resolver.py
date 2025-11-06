@@ -106,7 +106,7 @@ def resolve_context(state):
             "query": rewritten_query,
             "current_context": current_context
         }
-    except (json.JSONDecoderError, TypeError) as e:
+    except (json.JSONDecodeError, TypeError) as e:
         logger.error("Data parsing error during context resolution....")
         raise BadRequestException(f"Invalid data format : {e}")
     except Exception as e:
