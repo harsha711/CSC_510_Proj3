@@ -2,7 +2,7 @@ name: Test and Deploy SafeBites Backend
 
 on:
   push:
-    branches: [ main,chat-doc/merged-chat-doc-branch ]
+    branches: [ main,master,chat-doc/merged-chat-doc-branch ]
     paths:
       - 'proj2/SafeBites/backend/**'
       - '.github/workflows/**'
