@@ -5,11 +5,11 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-Framework-brightgreen?logo=fastapi)
 ![MongoDB](https://img.shields.io/badge/Database-MongoDB-green?logo=mongodb)
 ![React](https://img.shields.io/badge/Frontend-React-blue?logo=react)
-[![Coverage](https://img.shields.io/codecov/c/github/the-Shallow/SE-WOLFCAFE?label=Coverage&logo=codecov)](https://se-wolfcafe.onrender.com/index.html)
+[![Coverage](https://img.shields.io/codecov/c/github/the-Shallow/SE-WOLFCAFE?label=Coverage&logo=78%)](https://se-wolfcafe.onrender.com/index.html)
 [![License](https://img.shields.io/badge/License-MIT-yellow?logo=opensource-initiative)](LICENSE)
 [![Contributions welcome](https://img.shields.io/badge/Contributions-welcome-brightgreen.svg)](docs/CONTRIBUTING.md)
-[![Rubric](https://img.shields.io/badge/Contributions-welcome-brightgreen.svg)](docs/SELF_ASSESSMENT.md)
-
+[![Rubric](https://img.shields.io/badge/rubric-brightgreen.svg)](docs/SELF_ASSESSMENT.md)
+[![Project Poster](https://img.shields.io/badge/poster-brightgreen.svg)](docs/POSTER.pdf)
 ---
 
 ## 🏗️ Overview  
