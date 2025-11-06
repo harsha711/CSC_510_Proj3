@@ -41,28 +41,9 @@ jobs:
     needs: test-backend
     if: success()
     steps:
-      - name: Deploy to Render
-        env:
-          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-        run: |
-          echo "🚀 All tests passed! Deploying backend to Render..."
-          
-          http_code=$(curl -s -o response.json -w "%{http_code}" \
-            -X POST \
-            -H "Accept: application/json" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${RENDER_API_KEY}" \
-            -d '{"clearCache":false}' \
-            "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys")
-          
-          echo "HTTP Status: $http_code"
-          echo "Response Body:"
-          cat response.json
-          
-          if [ "$http_code" -ne 201 ]; then
-            echo "❌ Deployment failed"
-            exit 1
-          fi
-          
-          echo "✅ Deployment triggered successfully"
+      - uses: JorgeLNJunior/render-deploy@v1.4.5
+        with:
+          service_id: ${{ secrets.RENDER_SERVICE_ID }}
+          api_key: ${{ secrets.RENDER_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          wait_deploy: true
