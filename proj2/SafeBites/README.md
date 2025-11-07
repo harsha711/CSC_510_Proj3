@@ -195,7 +195,7 @@ docs/SELF_ASSESSMENT.md.
 
 | Name | Role | Contributions |
 |------|------|---------------|
-| Khush Patel & Ria Jha | Backend Developer | FastAPI, LangGraph, FAISS Integration |
+| Khush Patel & Richa Jha | Backend Developer | FastAPI, LangGraph, FAISS Integration |
 | Mia Glen & Ishwarya | Frontend Developer | React + Tailwind UI |
 
 
