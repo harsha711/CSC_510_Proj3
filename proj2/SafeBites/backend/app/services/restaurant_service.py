@@ -155,7 +155,7 @@ Ingredients: "{ingredients}"
 Output JSON ONLY:
 {{
   "ingredients": [...],
-  "inferred_allergens": [
+  "explicit_allergens": [
     {{"allergen": "...", "confidence": 0.95, "why": "..."}}
   ],
     "nutrition_facts": object with approximate numeric values and confidences for:
@@ -192,7 +192,7 @@ Output JSON ONLY:
 
     if not getattr(dish, "explicit_allergens", []):
         print("Setting allergens")
-        dish.explicit_allergens = refined.get("inferred_allergens", [])
+        dish.explicit_allergens = refined.get("explicit_allergens", [])
 
     if not getattr(dish, "nutrition_facts", {}):
         print("Setting nutrition facts")
@@ -414,8 +414,13 @@ Rules:
   leave the `ingredients.include` list empty.
 - Use `price`, `allergens`, and `nutrition` only when mentioned.
 - Never include a dish type (e.g. pizza, burger, pasta) in the ingredients list.
+- **For allergen queries**: Extract allergens to EXCLUDE from terms like "nut-free", "dairy-free", "gluten-free", etc.
+  - "nut-free" or "no nuts" → allergens.exclude: ["peanuts", "tree_nuts"]
+  - "dairy-free" → allergens.exclude: ["dairy"]
+  - "gluten-free" → allergens.exclude: ["wheat_gluten"]
+  - "shellfish-free" → allergens.exclude: ["shellfish"]
 
-Example:
+Example 1:
 Query: "Show me chocolate dishes under 10 dollars."
 Response:
 {{
@@ -425,12 +430,33 @@ Response:
   "nutrition": {{}}
 }}
 
+Example 2:
 Query: "List pizza dishes"
 Response:
 {{
   "price": {{}},
   "ingredients": {{"include": [], "exclude": []}},
   "allergens": {{}},
+  "nutrition": {{}}
+}}
+
+Example 3 (ALLERGEN FILTER):
+Query: "List nut-free dishes"
+Response:
+{{
+  "price": {{}},
+  "ingredients": {{"include": [], "exclude": []}},
+  "allergens": {{"exclude": ["peanuts", "tree_nuts"]}},
+  "nutrition": {{}}
+}}
+
+Example 4 (ALLERGEN FILTER):
+Query: "Show me dairy-free and gluten-free options"
+Response:
+{{
+  "price": {{}},
+  "ingredients": {{"include": [], "exclude": []}},
+  "allergens": {{"exclude": ["dairy", "wheat_gluten"]}},
   "nutrition": {{}}
 }}
 
@@ -504,10 +530,15 @@ Now analyze this query:
                 continue
             if filters.ingredients.exclude and set(filters.ingredients.exclude).intersection(set(d.ingredients)):
                 continue
-            if filters.allergens.exclude and set(filters.allergens.exclude).intersection(
-                set(d.allergens)
-            ):
-                continue
+
+            # Allergen filtering with case-insensitive matching and normalization
+            if filters.allergens.exclude:
+                # Normalize allergens: lowercase and replace spaces with underscores
+                excluded_allergens = {a.lower().replace(' ', '_') for a in filters.allergens.exclude}
+                dish_allergens = {a.lower().replace(' ', '_') for a in d.allergens}
+                if excluded_allergens.intersection(dish_allergens):
+                    continue
+
             if not passes_nutrition_filter(d):
                 continue
             filtered.append(d)
@@ -529,21 +560,38 @@ def validate_retrieved_dishes(query:str, dishes:list):
         For each of the following dishes, decide whether it matches the user's request.
         Be strict but reasonable — match meaningfully relevant dishes, not partial overlaps.
 
-        Output ONLY a valid JSON list:
+        CRITICAL: Your response must ONLY be valid JSON. Do not include any explanation, markdown formatting, or additional text.
+
+        Output format (JSON array only):
         [
-        {{"dish_id": "...", "include": true/false, "reason": "..."}},
-        ...
+        {{"dish_id": "...", "include": true, "reason": "..."}},
+        {{"dish_id": "...", "include": false, "reason": "..."}}
         ]
 
         Dishes:
         {dishes}
+
+        Remember: Output ONLY the JSON array, nothing else.
     """)
     try:
         response =  llm.invoke(prompt_template.format_messages(query=query,dishes=dishes))
-        parsed = json.loads(response.content)
+        content = response.content.strip()
+
+        # Try to extract JSON from markdown code blocks if present
+        if content.startswith("```"):
+            # Remove markdown code block markers
+            content = content.replace("```json", "").replace("```", "").strip()
+
+        parsed = json.loads(content)
         logging.debug(f"Filtered Dish IDs : {parsed}")
         validated = [DishValidationResult(**item) for item in parsed]
+    except json.JSONDecodeError as e:
+        logging.error(f"LLM returned invalid JSON for dish validation. Response: {response.content[:500]}")
+        # Fallback: return all dishes if LLM fails to validate
+        logging.warning("Falling back to returning all dishes due to JSON parse error")
+        return dishes
     except Exception as e:
+        logging.error(f"Error in validate_retrieved_dishes: {e}")
         raise GenericException(str(e))
 
     valid_ids = {v.dish_id for v in validated if v.include }

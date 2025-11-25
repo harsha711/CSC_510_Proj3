@@ -93,9 +93,8 @@ def handle_food_item_query(query, restaurant_id=None):
             "description": dish.get("description", "N/A"),
             "price": dish.get("price", "N/A"),
             "ingredients": dish.get("ingredients", []),
-            "serving_size": dish.get("serving_size", "N/A"),
             "availability": dish.get("availability", "N/A"),
-            "allergens": [a['allergen'] for a in dish.get("inferred_allergens", [])],
+            "allergens": [a['allergen'] for a in dish.get("explicit_allergens", [])],
             "nutrition_info": dish.get("nutrition_info", {})
         })
     print(f"Food item query results: {results}")
@@ -123,7 +122,6 @@ def get_dish_info(query, restaurant_id=None):
     Description: {dish.get('description', 'N/A')}
     Price: {dish.get('price', 'N/A')}
     Ingredients: {', '.join(dish.get('ingredients', []))}
-    Serving Size: {dish.get('serving_size', 'N/A')}
     Availability: {dish.get('availability', 'N/A')}
     Allergens: {', '.join([a for a in dish.get('allergens', [])])}
     Nutrition: {dish.get('nutrition_info', {})}
@@ -210,9 +208,8 @@ def create_faiss_index():
 Description : {dish["description"]}
 Price : {dish["price"]}
 Ingredients : {', '.join(dish.get("ingredients",[]))}
-Serving Size : {dish.get("serving_size","")}
 Availability : {dish.get("availability",True)}
-Allergens : {', '.join([a["allergen"] for a in dish.get("inferred_allergens",[])])}
+Allergens : {', '.join([a["allergen"] for a in dish.get("explicit_allergens",[])])}
 Nutrtion : {dish.get("nutrition_info",{})}
 """
             texts.append(text)
