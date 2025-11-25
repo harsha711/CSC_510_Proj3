@@ -82,27 +82,51 @@ def main():
 
     # Define file paths
     seed_data_dir = os.path.join(base_dir, 'seed_data')
-    restaurants_file = os.path.join(seed_data_dir, 'restaurants.json')
-    dishes_file = os.path.join(seed_data_dir, 'dishes.json')
-    dishes_refined_file = os.path.join(seed_data_dir, 'dishes_refined.json')
+    safebites_data_dir = os.path.join(base_dir, 'data', 'SafeBites_data')
 
-    # Check if files exist
-    if not os.path.exists(restaurants_file):
-        logger.error(f"restaurants.json not found in {seed_data_dir}")
-        logger.info("Run 'python generate_seed.py' first to generate seed data")
-        sys.exit(1)
+    # Ask user which data source to use
+    print("\nWhich data source would you like to load?")
+    print("1. seed_data/ (original seed data)")
+    print("2. data/SafeBites_data/ (fixed production data)")
+    data_source_choice = input("Enter choice (1 or 2, default: 2): ").strip() or "2"
 
-    # Ask user which dish file to use
-    print("\nWhich dish file would you like to load?")
-    print("1. dishes.json (60 basic dishes without allergen data)")
-    print("2. dishes_refined.json (16 dishes enriched with allergen & nutrition data)")
-    choice = input("Enter choice (1 or 2, default: 2): ").strip() or "2"
+    if data_source_choice == "2":
+        data_dir = safebites_data_dir
+        restaurants_file = os.path.join(data_dir, 'restaurants.json')
+        dishes_file = os.path.join(data_dir, 'dishes.json')
 
-    dish_file_to_use = dishes_refined_file if choice == "2" else dishes_file
+        # Check if files exist
+        if not os.path.exists(restaurants_file):
+            logger.error(f"restaurants.json not found in {data_dir}")
+            sys.exit(1)
+        if not os.path.exists(dishes_file):
+            logger.error(f"dishes.json not found in {data_dir}")
+            sys.exit(1)
 
-    if not os.path.exists(dish_file_to_use):
-        logger.error(f"{os.path.basename(dish_file_to_use)} not found!")
-        sys.exit(1)
+        dish_file_to_use = dishes_file
+    else:
+        data_dir = seed_data_dir
+        restaurants_file = os.path.join(data_dir, 'restaurants.json')
+        dishes_file = os.path.join(data_dir, 'dishes.json')
+        dishes_refined_file = os.path.join(data_dir, 'dishes_refined.json')
+
+        # Check if files exist
+        if not os.path.exists(restaurants_file):
+            logger.error(f"restaurants.json not found in {data_dir}")
+            logger.info("Run 'python generate_seed.py' first to generate seed data")
+            sys.exit(1)
+
+        # Ask user which dish file to use
+        print("\nWhich dish file would you like to load?")
+        print("1. dishes.json (60 basic dishes without allergen data)")
+        print("2. dishes_refined.json (16 dishes enriched with allergen & nutrition data)")
+        choice = input("Enter choice (1 or 2, default: 2): ").strip() or "2"
+
+        dish_file_to_use = dishes_refined_file if choice == "2" else dishes_file
+
+        if not os.path.exists(dish_file_to_use):
+            logger.error(f"{os.path.basename(dish_file_to_use)} not found!")
+            sys.exit(1)
 
     # Ask if user wants to clear existing data
     print("\n⚠️  Do you want to clear existing data before loading?")
@@ -159,9 +183,9 @@ def main():
         ingredients = sample_dish.get('ingredients', [])
         logger.info(f"  Ingredients: {', '.join(ingredients[:3])}...")
 
-        if 'inferred_allergens' in sample_dish and sample_dish.get('inferred_allergens'):
+        if 'explicit_allergens' in sample_dish and sample_dish.get('explicit_allergens'):
             allergens = [f"{a['allergen']} ({a.get('confidence', 0):.2f})"
-                        for a in sample_dish.get('inferred_allergens', [])]
+                        for a in sample_dish.get('explicit_allergens', [])]
             logger.info(f"  Allergens: {', '.join(allergens)}")
 
         if 'nutrition_facts' in sample_dish:

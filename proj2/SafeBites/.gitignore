@@ -23,7 +23,8 @@ Thumbs.db
 # /backend/htmlcov/
 /backend/*.db
 /backend/*.env
-/backend/logs
+/backend/logs/
+/backend/data/
 
 
 # Node frontend
