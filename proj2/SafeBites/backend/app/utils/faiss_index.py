@@ -46,7 +46,7 @@ Format the response in JSON:
 - type: "requires_menu_data" or "general_knowledge"
 
 """)
-    llm = ChatOpenAI(model="gpt-5",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"))
+    llm = ChatOpenAI(model="gpt-4o-mini",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"))
     response = llm.invoke(prompt.format_messages(query=query))
     print(f"LLM Response: {response.content}")
     try:
@@ -69,7 +69,7 @@ Query: {query}
 Format the response in JSON:
 - "answer": your answer to the query
                                               """)
-    llm = ChatOpenAI(model="gpt-5",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"))
+    llm = ChatOpenAI(model="gpt-4o-mini",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"))
     response = llm.invoke(prompt.format_messages(query=query))
     print(f"LLM Response: {response.content}")
     try:
@@ -143,7 +143,7 @@ You are a food information assistant.
 
     Dish Data: {context}
     """)
-    llm = ChatOpenAI(model="gpt-5",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"))
+    llm = ChatOpenAI(model="gpt-4o-mini",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"))
     response = llm.invoke(prompt.format_messages(query=query,context=context))
     print(f"LLM Response: {response.content}")
     try:
@@ -157,7 +157,7 @@ You are a food information assistant.
 
 
 def extract_query_intent(query):
-    llm = ChatOpenAI(model="gpt-5",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"))
+    llm = ChatOpenAI(model="gpt-4o-mini",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"))
     intent_prompt = ChatPromptTemplate.from_template("""
     You are an intent extraction expert for food-related natural language queries.
 

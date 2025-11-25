@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import { API_BASE_URL } from '../config/api';
 import './SearchChat.css';
-
-const API_BASE_URL = 'https://safebites-yu1o.onrender.com';
 
 interface DishResult {
   dish_id: string;

@@ -31,7 +31,7 @@ db = get_db()
 tmp_dir = "/tmp"
 os.makedirs(tmp_dir, exist_ok=True)
 
-llm = ChatOpenAI(model="gpt-5",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"),callbacks=[LLMUsageTracker()])
+llm = ChatOpenAI(model="gpt-4o-mini",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"),callbacks=[LLMUsageTracker()])
 
 restaurant_collection = db["restaurants"]
 
@@ -129,10 +129,10 @@ def enrich_dish_info(dish:DishCreate):
 
     Notes
     -----
-    Uses a GPT-5 model (via LangChain) to generate structured JSON output.
+    Uses a gpt-4o-mini model (via LangChain) to generate structured JSON output.
     Does not modify existing dish metadata like name, price, or availability.
     """
-    llm = ChatOpenAI(model="gpt-5", api_key=os.environ.get("OPENAI_KEY"))
+    llm = ChatOpenAI(model="gpt-4o-mini", api_key=os.environ.get("OPENAI_KEY"))
     prompt_template = ChatPromptTemplate.from_template("""
 You are an allergen annotator for a restaurant dish database.
 
