@@ -90,10 +90,28 @@ def extract_query_intent(query):
     """)
     try:
         response =  llm.invoke(intent_prompt.format_messages(query=query))
-        intents_json = json.loads(response.content)
+
+        # Log the raw response for debugging
+        logger.debug(f"Raw LLM response for query intent: {response.content}")
+
+        # Check if response is empty
+        if not response.content or not response.content.strip():
+            logger.warning(f"Empty LLM response for query intent: {query}. Using fallback.")
+            return QueryIntent(positive=[query], negative=[])
+
+        # Try to extract JSON from markdown code blocks if present
+        content = response.content.strip()
+        if content.startswith("```"):
+            content = content.replace("```json", "").replace("```", "").strip()
+
+        intents_json = json.loads(content)
         return QueryIntent(**intents_json)
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error in extract_query_intent. Response: {response.content[:500]}. Error: {str(e)}")
+        logger.warning("Falling back to default positive intent")
+        return QueryIntent(positive=[query], negative=[])
     except Exception as e:
-        logging.error(str(e))
+        logging.error(f"Error in extract_query_intent: {str(e)}")
         return QueryIntent(positive=[query], negative=[])
 
 

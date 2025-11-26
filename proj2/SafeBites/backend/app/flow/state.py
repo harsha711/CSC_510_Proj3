@@ -15,7 +15,7 @@ Key Components:
   final response.
 """
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel
 from ..models.dish_info_model import DishInfoResult, DishInfoResponse, DishData
 from ..models.intent_model import IntentExtractionResult
@@ -98,4 +98,4 @@ class ChatState(BaseModel):
     data : Dict[str,Any] = {}
     response : str = ""
     status : str = "pending"
-    timestamp : str = datetime.utcnow().isoformat()
+    timestamp : str = datetime.now(timezone.utc).isoformat()

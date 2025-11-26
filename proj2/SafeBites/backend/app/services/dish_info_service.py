@@ -65,6 +65,11 @@ def derive_dish_info_intent(query):
     response = llm.invoke(prompt.format_messages(query=query))
     logging.debug(f"LLM Intent Response: {response.content}")
     try:
+        # Check if response is empty
+        if not response.content or not response.content.strip():
+            logger.warning(f"Empty LLM response for derive_dish_info_intent query: {query}. Defaulting to general_knowledge.")
+            return IntentResponse(type="general_knowledge")
+
         content = response.content.strip()
 
         # Try to extract JSON from markdown code blocks if present
@@ -73,8 +78,12 @@ def derive_dish_info_intent(query):
 
         intent_json = json.loads(content)
         return IntentResponse(**intent_json)
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error in derive_dish_info_intent. Response: {response.content[:500]}. Error: {str(e)}")
+        logger.warning("Falling back to general_knowledge due to JSON parse error")
+        return IntentResponse(type="general_knowledge")
     except Exception as e:
-        logging.error(str(e))
+        logging.error(f"Error in derive_dish_info_intent: {str(e)}")
         raise GenericException(f"Unexpected error: {str(e)}")
 
 
@@ -104,6 +113,11 @@ def handle_general_knowledge(query):
     response = llm.invoke(prompt.format_messages(query=query))
     logging.debug(f"LLM Response: {response.content}")
     try:
+        # Check if response is empty
+        if not response.content or not response.content.strip():
+            logger.warning(f"Empty LLM response for general knowledge query: {query}. Returning error message.")
+            return GeneralKnowledgeResponse(answer="I apologize, but I couldn't generate a response. Please try again.")
+
         content = response.content.strip()
 
         # Try to extract JSON from markdown code blocks if present
@@ -112,7 +126,11 @@ def handle_general_knowledge(query):
 
         answer_json = json.loads(content)
         return GeneralKnowledgeResponse(**answer_json)
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error in handle_general_knowledge. Response: {response.content[:500]}. Error: {str(e)}")
+        return GeneralKnowledgeResponse(answer=f"I understand you're asking: {query}. However, I encountered an error processing the response. Please try rephrasing your question.")
     except Exception as e:
+        logger.error(f"Error in handle_general_knowledge: {str(e)}")
         raise GenericException(str(e))
 
 def handle_food_item_query(query, restaurant_id=None):
@@ -265,12 +283,34 @@ def get_dish_info(state):
         """)
         response = llm.invoke(prompt.format_messages(query=query,context=context))
         logging.debug(f"LLM Response: {response.content}")
-        
+
         try:
-            response_json = json.loads(response.content)
+            # Check if response is empty
+            if not response.content or not response.content.strip():
+                logger.warning(f"Empty LLM response for dish info query: {query}")
+                results[query] = DishInfoResponse(
+                    dish_name=None,
+                    requested_info="No response generated",
+                    source_data=[]
+                )
+                continue
+
+            # Try to extract JSON from markdown code blocks if present
+            content = response.content.strip()
+            if content.startswith("```"):
+                content = content.replace("```json", "").replace("```", "").strip()
+
+            response_json = json.loads(content)
             results[query] = DishInfoResponse(**response_json)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error in get_dish_info. Response: {response.content[:500]}. Error: {str(e)}")
+            results[query] = DishInfoResponse(
+                dish_name=None,
+                requested_info="Could not parse LLM Response",
+                source_data=[]
+            )
         except Exception as e:
-            logger.error(str(e))
+            logger.error(f"Error parsing dish info response: {str(e)}")
             results[query] = DishInfoResponse(
                 dish_name=None,
                 requested_info="Could not parse LLM Response",
