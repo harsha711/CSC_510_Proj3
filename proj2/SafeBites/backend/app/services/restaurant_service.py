@@ -465,7 +465,22 @@ Now analyze this query:
 """)
     try:
         response =  llm.invoke(prompt_template.format_messages(query=query))
-        raw_filters = json.loads(response.content)
+
+        # Log the raw response for debugging
+        logger.debug(f"Raw LLM response for filters: {response.content}")
+
+        # Check if response is empty
+        if not response.content or not response.content.strip():
+            logger.warning(f"Empty LLM response for query: {query}. Using default filters.")
+            # Return dishes without filtering if LLM fails
+            return dishes
+
+        # Try to extract JSON from markdown code blocks if present
+        content = response.content.strip()
+        if content.startswith("```"):
+            content = content.replace("```json", "").replace("```", "").strip()
+
+        raw_filters = json.loads(content)
         logger.debug(f"Extracted raw filters: {raw_filters}")
         price = raw_filters.get("price", {})
         min_price = price.get("min")
@@ -479,8 +494,14 @@ Now analyze this query:
         raw_filters["price"]["max"] = max_price
         filters = DishFilterModel.parse_obj(raw_filters)
         logging.debug(f"Generated filters : {filters.dict()}")
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error in apply_filters. Response: {response.content[:500]}. Error: {str(e)}")
+        logger.warning("Falling back to returning all dishes due to JSON parse error")
+        return dishes
     except Exception as e:
-        raise GenericException(str(e))
+        logger.error(f"Error in apply_filters: {str(e)}")
+        logger.warning("Falling back to returning all dishes due to unexpected error")
+        return dishes
 
     # price = filters.get("price",{})
     # include_ing = set(filters.get("ingredients",{}).get("include",[]))

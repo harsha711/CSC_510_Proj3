@@ -78,7 +78,7 @@ def resolve_context(state):
         logger.debug("Rewritten Query:", response.content)
         # return {"query": response.content.strip()}
 
-        rewritten_query = response.content.strip().strip()
+        rewritten_query = response.content.strip()
 
         if not rewritten_query:
             raise GenericException("LLM returned an empty rewritten query.")
