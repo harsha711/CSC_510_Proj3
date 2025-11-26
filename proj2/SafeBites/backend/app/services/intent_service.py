@@ -119,16 +119,39 @@ def extract_query_intent(state):
     """)
     try:
         response = llm.invoke(prompt.format_messages(query=query))
-        data = json.loads(response.content)
+
+        # Log the raw response for debugging
+        logger.debug(f"Raw LLM response for intent extraction: {response.content}")
+
+        # Check if response is empty
+        if not response.content or not response.content.strip():
+            logger.warning(f"Empty LLM response for query: {query}. Treating as irrelevant.")
+            return {"intents":IntentExtractionResult(
+                intents=[IntentQuery(type="irrelevant",query=query)]
+            )}
+
+        # Try to extract JSON from markdown code blocks if present
+        content = response.content.strip()
+        if content.startswith("```"):
+            content = content.replace("```json", "").replace("```", "").strip()
+
+        data = json.loads(content)
         logging.debug(f"Extracted intents: {data}")
 
         intents: List[IntentQuery] = []
         for intent_type, queries in data.items():
             for q in queries:
                 intents.append(IntentQuery(type=intent_type, query=q))
-    
+
         return {"intents":IntentExtractionResult(intents=intents)}
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error in extract_query_intent. Response: {response.content[:500]}. Error: {str(e)}")
+        logger.warning("Falling back to treating query as irrelevant due to JSON parse error")
+        return {"intents":IntentExtractionResult(
+            intents=[IntentQuery(type="irrelevant",query=query)]
+        )}
     except Exception as e:
+        logger.error(f"Error in extract_query_intent: {str(e)}")
         return {"intents":IntentExtractionResult(
             intents=[IntentQuery(type="irrelevant",query=query)]
         )}

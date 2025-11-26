@@ -181,9 +181,26 @@ Output JSON ONLY:
     response = llm.invoke(prompt)
 
     try:
-        refined = json.loads(response.content)
+        # Log the raw response for debugging
+        logger.debug(f"Raw LLM response for enrich_dish_info: {response.content}")
+
+        # Check if response is empty
+        if not response.content or not response.content.strip():
+            logger.warning(f"Empty LLM response for dish enrichment: {dish.name}. Returning original dish.")
+            return dish
+
+        # Try to extract JSON from markdown code blocks if present
+        content = response.content.strip()
+        if content.startswith("```"):
+            content = content.replace("```json", "").replace("```", "").strip()
+
+        refined = json.loads(content)
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error in enrich_dish_info. Response: {response.content[:500]}. Error: {str(e)}")
+        logger.warning(f"Falling back to original dish data for: {dish.name}")
+        return dish
     except Exception as e:
-        logger.error(str(e))
+        logger.error(f"Error in enrich_dish_info: {str(e)}")
         return dish
     
     if not getattr(dish, "ingredients", []):
