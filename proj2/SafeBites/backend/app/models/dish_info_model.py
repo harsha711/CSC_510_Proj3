@@ -33,6 +33,7 @@ class DishData(BaseModel):
         description (Optional[str]): Short textual description of the dish.
         price (Optional[Any]): Price value, which may vary in type (string, float, or object).
         ingredients (List[str]): List of primary ingredients used in the dish.
+        serving_size (Optional[str]): The portion size or serving information.
         availability (Optional[bool]): Indicates if the dish is currently available.
         allergens (List[str]): List of potential allergens present in the dish.
         nutrition_facts (Dict[str, Any]): Key-value mapping of nutritional data
@@ -43,6 +44,7 @@ class DishData(BaseModel):
     description : Optional[str] = None
     price : Optional[Any] = None
     ingredients : List[str] = None
+    serving_size : Optional[str] = None
     availability : Optional[bool] = None
     allergens : List[str] = None
     nutrition_facts : Dict[str, Any] = {}
