@@ -32,10 +32,11 @@ def derive_dish_info_intent(query):
 
     This function uses an LLM to analyze the query and classify it as either:
     - "requires_menu_data" (when query involves dishes, ingredients, allergens, or calories)
-    - "general_knowledge" (when query is conceptual or unrelated to a restaurant’s menu)
+    - "general_knowledge" (when query is conceptual or unrelated to a restaurant's menu,
+      OR when the context already contains sufficient information to answer)
 
     Args:
-        query (str): The user's natural language question.
+        query (str): The user's natural language question (may include context).
 
     Returns:
         dict: JSON-like dictionary containing:
@@ -47,11 +48,13 @@ def derive_dish_info_intent(query):
     prompt = ChatPromptTemplate.from_template("""
         You are an intent analyzer for a food assistant.
 
-        Given a query, decide whether the answer requires fetching restaurant menu data.
+        Given a query (which may include additional context), decide whether you need to fetch restaurant menu data or if you can answer from the provided context.
 
         Possible outputs:
-        - "requires_menu_data" → if the question is about dishes, ingredients, allergens, calories, or menu items that might exist in the restaurant data.
-        - "general_knowledge" → if the question is conceptual and doesn't depend on any restaurant data.
+        - "requires_menu_data" → if the question is about dishes, ingredients, allergens, or calories AND the context does not contain the answer.
+        - "general_knowledge" → if (1) the question is conceptual/general, OR (2) the "Additional context" section already contains sufficient information to answer the query.
+
+        **CRITICAL**: If the query includes an "Additional context:" section that contains the answer to the user's question, return "general_knowledge".
 
         Query: {query}
 
@@ -163,6 +166,7 @@ def handle_food_item_query(query, restaurant_id=None):
             description=dish["description"],
             price=dish["price"],
             ingredients=dish["ingredients"],
+            serving_size=dish.get("serving_size"),
             availability=dish.get("availability", True),
             allergens=[a["allergen"] for a in dish.get("explicit_allergens", [])],
             nutrition_facts=dish.get("nutrition_facts", {})
@@ -262,8 +266,8 @@ def get_dish_info(state):
             f"Description : {d.description}\n"
             f"Price : {d.price}\n"
             f"Ingredients : {', '.join(d.ingredients or [])}\n"
-            f"Serving Size: {d.serving_size}\n"
-            f"Availibility: {d.availibility}\n"
+            f"Serving Size: {d.serving_size or 'N/A'}\n"
+            f"Availability: {d.availability}\n"
             f"Allergens : {', '.join(d.allergens or [])}\n"
             f"Nutrition : {d.nutrition_facts}\n"
             for d in dishes

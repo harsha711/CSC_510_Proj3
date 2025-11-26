@@ -413,7 +413,16 @@ def apply_filters(query,dishes):
         return []
     prompt_template = ChatPromptTemplate.from_template("""
 You are a filter extraction model for a restaurant system.
-Extract filters related to price, ingredients, allergens, or nutrition.
+Extract filters related to price, ingredients, allergens, or nutrition from the user's query and context.
+
+**CRITICAL RULES**:
+1. **Price filters**: If a price constraint is mentioned in EITHER the query OR the context, apply it.
+   - If context says "dishes under $20" and query says "show me pizzas", maintain the price filter.
+2. **User allergen preferences**: If the context contains "User is allergic to: X, Y, Z", ALWAYS exclude those allergens.
+   - User allergens should ALWAYS be excluded in every query throughout the session.
+3. **Allergen filters from query**: If the user explicitly mentions allergen restrictions in the current query (e.g., "nut-free"), add those to the exclude list as well.
+4. **Ingredient filters**: Extract from the current query only.
+5. **Nutrition filters**: If mentioned in EITHER the query OR context, apply it.
 
 Return only JSON in this structure:
 {{
@@ -429,16 +438,22 @@ Rules:
   But "pizza", "burger", "pasta", or "sandwich" are **dish types**, not ingredients — exclude them.
 - If the user asks for a specific dish type (like "List pizza dishes" or "Show me burgers"),
   leave the `ingredients.include` list empty.
-- Use `price`, `allergens`, and `nutrition` only when mentioned.
-- Never include a dish type (e.g. pizza, burger, pasta) in the ingredients list.
-- **For allergen queries**: Extract allergens to EXCLUDE from terms like "nut-free", "dairy-free", "gluten-free", etc.
-  - "nut-free" or "no nuts" → allergens.exclude: ["peanuts", "tree_nuts"]
-  - "dairy-free" → allergens.exclude: ["dairy"]
-  - "gluten-free" → allergens.exclude: ["wheat_gluten"]
-  - "shellfish-free" → allergens.exclude: ["shellfish"]
+- **Maintain price and nutrition filters from context** unless explicitly overridden in the new query.
+- **CRITICAL - User allergen preferences ONLY**: Look for the EXACT phrase "User is allergic to:" in the context.
+  - If found, extract ONLY those allergens. Example: "User is allergic to: peanuts, dairy" → allergens.exclude: ["peanuts", "dairy"]
+  - DO NOT extract allergens from dish descriptions, previous search results, or dish allergen lists.
+  - If you don't see "User is allergic to:" phrase, leave allergens.exclude EMPTY (unless query has allergen restrictions).
+- **For allergen queries in current query**: Extract additional allergens to EXCLUDE if explicitly mentioned:
+  - "nut-free" or "no nuts" → add ["peanuts", "tree_nuts"] to allergens.exclude
+  - "dairy-free" → add ["dairy"] to allergens.exclude
+  - "gluten-free" → add ["wheat_gluten"] to allergens.exclude
+  - "shellfish-free" → add ["shellfish"] to allergens.exclude
+- **Combine user allergens with query allergens**: If user is allergic to peanuts and query asks for dairy-free, exclude both.
+- **DO NOT invent filters**: If query is "show me pizzas", leave allergens.exclude EMPTY (unless "User is allergic to:" is in context or query has restrictions).
 
 Example 1:
 Query: "Show me chocolate dishes under 10 dollars."
+Context: None
 Response:
 {{
   "price": {{"max": 10, "min": 0}},
@@ -449,6 +464,7 @@ Response:
 
 Example 2:
 Query: "List pizza dishes"
+Context: None
 Response:
 {{
   "price": {{}},
@@ -459,6 +475,7 @@ Response:
 
 Example 3 (ALLERGEN FILTER):
 Query: "List nut-free dishes"
+Context: None
 Response:
 {{
   "price": {{}},
@@ -469,11 +486,71 @@ Response:
 
 Example 4 (ALLERGEN FILTER):
 Query: "Show me dairy-free and gluten-free options"
+Context: None
 Response:
 {{
   "price": {{}},
   "ingredients": {{"include": [], "exclude": []}},
   "allergens": {{"exclude": ["dairy", "wheat_gluten"]}},
+  "nutrition": {{}}
+}}
+
+Example 5 (MAINTAINING PRICE FILTER FROM CONTEXT):
+Query: "Show me pizzas"
+Context: "User previously searched for dishes under $20"
+Response:
+{{
+  "price": {{"max": 20, "min": 0}},
+  "ingredients": {{"include": [], "exclude": []}},
+  "allergens": {{"exclude": []}},
+  "nutrition": {{}}
+}}
+
+Example 6 (OVERRIDING PRICE FILTER):
+Query: "Show me dishes under $15"
+Context: "User previously searched for dishes under $20"
+Response:
+{{
+  "price": {{"max": 15, "min": 0}},
+  "ingredients": {{"include": [], "exclude": []}},
+  "allergens": {{"exclude": []}},
+  "nutrition": {{}}
+}}
+
+Example 7 (USER ALLERGEN PREFERENCES):
+Query: "Show me pizzas"
+Context: "User is allergic to: peanuts, dairy"
+Response:
+{{
+  "price": {{}},
+  "ingredients": {{"include": [], "exclude": []}},
+  "allergens": {{"exclude": ["peanuts", "dairy"]}},
+  "nutrition": {{}}
+}}
+
+Example 8 (USER ALLERGENS + QUERY ALLERGENS):
+Query: "Show me gluten-free dishes"
+Context: "User is allergic to: shellfish, soy"
+Response:
+{{
+  "price": {{}},
+  "ingredients": {{"include": [], "exclude": []}},
+  "allergens": {{"exclude": ["shellfish", "soy", "wheat_gluten"]}},
+  "nutrition": {{}}
+}}
+
+Example 9 (WRONG - DO NOT DO THIS):
+Query: "Show me pizza dishes"
+Context: "The available pizza dishes include Pizza Express Margherita with allergens: Wheat Gluten, Dairy"
+Response (WRONG):
+{{
+  "allergens": {{"exclude": ["wheat_gluten", "dairy"]}}  <-- WRONG! Don't extract from dish descriptions!
+}}
+Response (CORRECT):
+{{
+  "price": {{}},
+  "ingredients": {{"include": [], "exclude": []}},
+  "allergens": {{"exclude": []}},  <-- CORRECT! No "User is allergic to:" phrase, so leave empty
   "nutrition": {{}}
 }}
 
@@ -564,10 +641,32 @@ Now analyze this query:
             max_price = price.max
             if not (min_price <= d.price <= max_price):
                 continue
-            if filters.ingredients.include and not set(filters.ingredients.include).issubset(set(d.ingredients)):
-                continue
-            if filters.ingredients.exclude and set(filters.ingredients.exclude).intersection(set(d.ingredients)):
-                continue
+            # Ingredient include filtering - use partial matching (case-insensitive)
+            if filters.ingredients.include:
+                dish_ingredients_lower = [ing.lower() for ing in d.ingredients]
+                # Check if ANY required ingredient is found (partial match)
+                found = False
+                for required in filters.ingredients.include:
+                    required_lower = required.lower()
+                    # Check if required ingredient is contained in any dish ingredient
+                    if any(required_lower in dish_ing for dish_ing in dish_ingredients_lower):
+                        found = True
+                        break
+                if not found:
+                    continue
+
+            # Ingredient exclude filtering - use partial matching (case-insensitive)
+            if filters.ingredients.exclude:
+                dish_ingredients_lower = [ing.lower() for ing in d.ingredients]
+                excluded = False
+                for excluded_ing in filters.ingredients.exclude:
+                    excluded_lower = excluded_ing.lower()
+                    # Check if excluded ingredient is contained in any dish ingredient
+                    if any(excluded_lower in dish_ing for dish_ing in dish_ingredients_lower):
+                        excluded = True
+                        break
+                if excluded:
+                    continue
 
             # Allergen filtering with case-insensitive matching and normalization
             if filters.allergens.exclude:
