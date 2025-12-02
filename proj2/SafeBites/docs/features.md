@@ -18,8 +18,8 @@
 
 SafeBites is an intelligent food delivery and menu search platform that combines conversational AI, semantic search, and allergen safety features to help users discover and understand restaurant menus through natural language conversations.
 
-**Current Version:** Project 2
-**Status:** Production Ready
+**Current Version:** Project 3
+**Status:** In Production
 **Last Updated:** December 2025
 
 ---
@@ -57,7 +57,7 @@ An advanced AI-powered search system that understands natural language queries a
 ---
 
 ### 2. Semantic Search with FAISS
-**Status:** ✅ Implemented
+**Status:** Pending
 
 Advanced vector-based semantic search that understands meaning beyond keyword matching.
 
@@ -1060,7 +1060,7 @@ Restaurant owner analytics and insights.
 - **Components:** 15+
 
 **AI/ML:**
-- **LLM Models Used:** GPT-4o-mini, GPT-5
+- **LLM Models Used:** GPT-4o-mini
 - **Embedding Dimensions:** 1536
 - **Vector Database:** FAISS (CPU)
 - **Processing Pipeline Nodes:** 7
