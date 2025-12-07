@@ -89,6 +89,15 @@ def format_final_response(state:ChatState):
                         compatibility_score=compatibility_score
                     ))
 
+                # SORT BY COMPATIBILITY SCORE (highest first)
+                # Dishes with no compatibility score go to the end
+                dish_results.sort(
+                    key=lambda d: d.compatibility_score.overall_score if d.compatibility_score else -1,
+                    reverse=True
+                )
+
+                logger.debug(f"Sorted {len(dish_results)} dishes by compatibility score (descending)")
+
                 responses.append(QueryResponse(
                     query=query,
                     type="menu_search",

@@ -256,7 +256,7 @@ def update_faiss_index(new_dishes,index_path="faiss_index_restaurant"):
     except Exception as e:
         logger.error(f"Failed to update FAISS index : {str(e)}")
 
-def search_dishes(query, restaurant_id=None,top_k=20,threshold=0.8):
+def search_dishes(query, restaurant_id=None,top_k=20,threshold=0.5):
     """
     Perform similarity search using FAISS vector store.
 
@@ -264,7 +264,7 @@ def search_dishes(query, restaurant_id=None,top_k=20,threshold=0.8):
         query (str): Search query.
         restaurant_id (Optional[str]): Filter dishes by restaurant.
         top_k (int): Max number of results.
-        threshold (float): Minimum similarity score to include.
+        threshold (float): Minimum similarity score to include. Default 0.5 for better recall.
 
     Returns:
         List[DishHit]: Filtered and structured dish hits.
@@ -328,17 +328,27 @@ def semantic_retrieve_with_negation(query,restaurant_id=None):
         List[DishHit]: Refined and filtered dish hits.
     """
     logging.debug(f"Semantic retrieve called with query: {query} and restaurant_id: {restaurant_id}")
-    
+
     intents = extract_query_intent(query)
+    logger.info(f"Extracted intents - Positive: {intents.positive}, Negative: {intents.negative}")
+
     pos_hits, neg_hits = [],[]
 
     for p in intents.positive:
-        pos_hits.extend(search_dishes(p,restaurant_id=restaurant_id))
+        hits = search_dishes(p,restaurant_id=restaurant_id)
+        logger.info(f"Positive intent '{p}' returned {len(hits)} dishes")
+        pos_hits.extend(hits)
+
     for n in intents.negative:
-        neg_hits.extend(search_dishes(n,restaurant_id=restaurant_id))
+        hits = search_dishes(n,restaurant_id=restaurant_id)
+        logger.info(f"Negative intent '{n}' returned {len(hits)} dishes (will be excluded)")
+        neg_hits.extend(hits)
+
+    logger.info(f"Total positive hits: {len(pos_hits)}, Total negative hits: {len(neg_hits)}")
 
     neg_ids = set([hit.dish["_id"] for hit in neg_hits])
     filtered_dishes = [hit for hit in pos_hits if hit.dish["_id"] not in neg_ids]
+    logger.info(f"After negative filtering: {len(filtered_dishes)} dishes remain")
 
     seen = set()
     unique_filtered_dishes = []
