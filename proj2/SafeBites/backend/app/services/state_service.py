@@ -116,27 +116,49 @@ def rebuild_context(session_id:str, user_id:str = None, last_n:int=5):
     print(f"Chat States for context rebuild: {chat_states}")
     context = []
 
-    # Add user allergen preferences as first context item
+    # Add complete user profile as first context item (for compatibility scoring)
     if user_id:
         from bson import ObjectId
         users = db["users"]
         try:
-            print(f"Fetching allergen preferences for user_id: {user_id}")
+            print(f"Fetching user profile for user_id: {user_id}")
             user_doc = users.find_one({"_id": ObjectId(user_id)})
             print(f"User document: {user_doc}")
-            if user_doc and user_doc.get("allergen_preferences"):
+
+            if user_doc:
+                # Extract allergen preferences
                 allergen_prefs = user_doc.get("allergen_preferences", [])
-                print(f"Found allergen preferences: {allergen_prefs}")
-                context.append({
-                    "user_allergens": allergen_prefs,
-                    "message": f"User is allergic to: {', '.join(allergen_prefs)}"
-                })
+                if allergen_prefs:
+                    print(f"Found allergen preferences: {allergen_prefs}")
+                    context.append({
+                        "user_allergens": allergen_prefs,
+                        "message": f"User is allergic to: {', '.join(allergen_prefs)}"
+                    })
+
+                # Extract full user profile for compatibility scoring
+                health_goals = user_doc.get("health_goals", [])
+                cuisine_preferences = user_doc.get("cuisine_preferences", [])
+                taste_preferences = user_doc.get("taste_preferences", [])
+                dietary_pattern = user_doc.get("dietary_pattern", "omnivore")
+
+                # Add full profile if any compatibility-related fields exist
+                if health_goals or cuisine_preferences or taste_preferences or dietary_pattern != "omnivore":
+                    print(f"Found user profile for compatibility scoring")
+                    context.append({
+                        "user_profile": {
+                            "health_goals": health_goals,
+                            "cuisine_preferences": cuisine_preferences,
+                            "taste_preferences": taste_preferences,
+                            "dietary_pattern": dietary_pattern
+                        },
+                        "message": f"User profile: {dietary_pattern} diet, health goals: {', '.join(health_goals) if health_goals else 'none'}"
+                    })
             else:
-                print(f"No allergen preferences found for user {user_id}")
+                print(f"No user document found for user {user_id}")
         except Exception as e:
-            print(f"Could not fetch user allergens: {e}")
+            print(f"Could not fetch user profile: {e}")
     else:
-        print("No user_id provided, skipping allergen preference fetch")
+        print("No user_id provided, skipping user profile fetch")
 
     for cs in chat_states[-last_n:]:
         context.append({

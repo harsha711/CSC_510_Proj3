@@ -21,6 +21,7 @@ from ..services.intent_service import extract_query_intent
 from ..services.retrieval_service import get_menu_items
 from ..services.dish_info_service import get_dish_info
 from ..services.user_preferences_service import get_user_preferences
+from ..services.compatibility_service import calculate_compatibility_scores
 from ..services.response_synthesizer_tool import format_final_response
 from ..services.context_resolver import resolve_context
 
@@ -76,7 +77,8 @@ def create_chat_graph():
         4. **menu_retriever** – Retrieves menu or restaurant data based on queries.
         5. **informative_retriever** – Fetches detailed dish information.
         6. **user_preferences_retriever** – Handles user preference queries.
-        7. **format_final_response** – Synthesizes a natural language response.
+        7. **compatibility_scorer** – Calculates AI compatibility scores for dishes.
+        8. **format_final_response** – Synthesizes a natural language response.
 
     The graph uses `ChatState` to store and update intermediate information
     throughout the conversation.
@@ -99,15 +101,25 @@ def create_chat_graph():
     graph.add_node("menu_retriever",get_menu_items)
     graph.add_node("informative_retriever",get_dish_info)
     graph.add_node("user_preferences_retriever",get_user_preferences)
+    graph.add_node("compatibility_scorer",calculate_compatibility_scores)
     graph.add_node("format_final_response",format_final_response)
+
     graph.set_entry_point("context_resolver")
     graph.add_edge("context_resolver","intent_classifier")
     graph.add_edge("intent_classifier","query_part_generator")
+
+    # Parallel execution of retrievers
     graph.add_edge("query_part_generator","menu_retriever")
     graph.add_edge("query_part_generator","informative_retriever")
     graph.add_edge("query_part_generator","user_preferences_retriever")
-    graph.add_edge("menu_retriever","format_final_response")
+
+    # Compatibility scorer runs after menu retriever (needs dishes to score)
+    graph.add_edge("menu_retriever","compatibility_scorer")
+
+    # All paths converge to final response
+    graph.add_edge("compatibility_scorer","format_final_response")
     graph.add_edge("informative_retriever","format_final_response")
     graph.add_edge("user_preferences_retriever","format_final_response")
+
     graph.set_finish_point("format_final_response")
     return graph.compile()

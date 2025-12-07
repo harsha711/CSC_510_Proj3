@@ -21,6 +21,7 @@ from ..models.dish_info_model import DishInfoResult, DishInfoResponse, DishData
 from ..models.intent_model import IntentExtractionResult
 from ..models.restaurant_model import MenuResultResponse
 from ..models.user_preferences_model import UserPreferencesResult
+from ..models.compatibility_model import CompatibilityResult
 
 class ChatState(BaseModel):
     """
@@ -70,7 +71,10 @@ class ChatState(BaseModel):
         preference_results (Optional[UserPreferencesResult]):
             Contains responses to user preference queries like "what am I allergic to?"
 
-        data (Dict[str, Any]): 
+        compatibility_results (Optional[CompatibilityResult]):
+            Contains AI-powered compatibility scores for dishes based on user profile.
+
+        data (Dict[str, Any]):
             A general-purpose container for intermediate computation results,
             cache data, or node-specific metadata during chat flow execution.
 
@@ -100,7 +104,9 @@ class ChatState(BaseModel):
     # info_results: Optional[Dict[str,Dict[str, Any]]] = None
     info_results: Optional[DishInfoResult] = None
     preference_results: Optional[UserPreferencesResult] = None
+    compatibility_results: Optional[CompatibilityResult] = None
     data : Dict[str,Any] = {}
+    responses: Optional[List[Dict[str, Any]]] = None  # Formatted responses array for frontend
     response : str = ""
     status : str = "pending"
     timestamp : str = datetime.now(timezone.utc).isoformat()
