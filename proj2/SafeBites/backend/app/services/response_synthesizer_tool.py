@@ -10,7 +10,7 @@ import logging
 from dotenv import load_dotenv
 from typing import List
 from ..flow.state import ChatState
-from ..models.responder_model import QueryResponse, DishResult, InfoResult, PreferenceResult, FinalResponse
+from ..models.responder_model import QueryResponse, DishResult, InfoResult, PreferenceResult, FinalResponse, CompatibilityScoreBreakdown
 
 load_dotenv()
 
@@ -55,10 +55,26 @@ def format_final_response(state:ChatState):
 
         if state.menu_results and state.menu_results.menu_results:
             for query, dishes in state.menu_results.menu_results.items():
-                responses.append(QueryResponse(
-                    query=query,
-                    type="menu_search",
-                    result=[DishResult(
+                # Build dish results with compatibility scores if available
+                dish_results = []
+                for dish in dishes:
+                    # Check if compatibility score exists for this dish
+                    compatibility_score = None
+                    if state.compatibility_results and state.compatibility_results.scores:
+                        comp_score = state.compatibility_results.scores.get(dish.dish_id)
+                        if comp_score:
+                            # Convert CompatibilityScore to CompatibilityScoreBreakdown
+                            compatibility_score = CompatibilityScoreBreakdown(
+                                overall_score=comp_score.overall_score,
+                                allergen_safety=comp_score.allergen_safety.model_dump(),
+                                nutrition_match=comp_score.nutrition_match.model_dump(),
+                                taste_preference=comp_score.taste_preference.model_dump(),
+                                dietary_pattern=comp_score.dietary_pattern.model_dump(),
+                                recommendation=comp_score.recommendation,
+                                alternative_suggestions=[alt.model_dump() for alt in comp_score.alternative_suggestions]
+                            )
+
+                    dish_results.append(DishResult(
                         _id=dish.dish_id,
                         restaurant_id=state.restaurant_id,
                         name=dish.dish_name,
@@ -69,8 +85,14 @@ def format_final_response(state:ChatState):
                         explicit_allergens=dish.allergens or [],
                         nutrition_facts=dish.nutrition_facts,
                         availability=dish.availability,
-                        serving_size=dish.serving_size
-                    ) for dish in dishes]
+                        serving_size=dish.serving_size,
+                        compatibility_score=compatibility_score
+                    ))
+
+                responses.append(QueryResponse(
+                    query=query,
+                    type="menu_search",
+                    result=dish_results
                 ))
 
         if state.info_results and state.info_results.info_results:
@@ -100,16 +122,16 @@ def format_final_response(state:ChatState):
                 ))
 
         logger.debug(f"Final formatted responses: {responses}")
-        final = FinalResponse(
-            user_id=state.user_id,
-            session_id=state.session_id,
-            restaurant_id=state.restaurant_id,
-            original_query=state.query,
-            responses=responses,
-            status="success" if responses else "failed"
-        )
-        logger.debug(f"Final Response Object: {final}")
-        return final
+        status = "success" if responses else "failed"
+        logger.debug(f"Final Response Status: {status}, Response Count: {len(responses)}")
+
+        # Convert responses to dict format for ChatState
+        responses_dict = [resp.model_dump() for resp in responses]
+
+        return {
+            "responses": responses_dict,
+            "status": status
+        }
     except Exception as e:
         logger.error(f"Error formatting final response: {e}", exc_info=True)
         raise e

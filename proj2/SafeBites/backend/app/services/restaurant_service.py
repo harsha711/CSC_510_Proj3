@@ -418,9 +418,11 @@ Extract filters related to price, ingredients, allergens, or nutrition from the 
 **CRITICAL RULES**:
 1. **Price filters**: If a price constraint is mentioned in EITHER the query OR the context, apply it.
    - If context says "dishes under $20" and query says "show me pizzas", maintain the price filter.
-2. **User allergen preferences**: If the context contains "User is allergic to: X, Y, Z", ALWAYS exclude those allergens.
-   - User allergens should ALWAYS be excluded in every query throughout the session.
-3. **Allergen filters from query**: If the user explicitly mentions allergen restrictions in the current query (e.g., "nut-free"), add those to the exclude list as well.
+2. **User allergen preferences**: DO NOT filter user allergens from context!
+   - If context contains "User is allergic to: X, Y, Z", IGNORE it for filtering purposes.
+   - User allergens are handled separately by the compatibility scoring system.
+   - Leave allergens.exclude EMPTY unless the query explicitly requests allergen filtering.
+3. **Allergen filters from query**: ONLY if the user explicitly mentions allergen restrictions in the current query (e.g., "nut-free", "show me gluten-free dishes"), add those to the exclude list.
 4. **Ingredient filters**: Extract from the current query only.
 5. **Nutrition filters**: If mentioned in EITHER the query OR context, apply it.
 
@@ -439,17 +441,17 @@ Rules:
 - If the user asks for a specific dish type (like "List pizza dishes" or "Show me burgers"),
   leave the `ingredients.include` list empty.
 - **Maintain price and nutrition filters from context** unless explicitly overridden in the new query.
-- **CRITICAL - User allergen preferences ONLY**: Look for the EXACT phrase "User is allergic to:" in the context.
-  - If found, extract ONLY those allergens. Example: "User is allergic to: peanuts, dairy" → allergens.exclude: ["peanuts", "dairy"]
-  - DO NOT extract allergens from dish descriptions, previous search results, or dish allergen lists.
-  - If you don't see "User is allergic to:" phrase, leave allergens.exclude EMPTY (unless query has allergen restrictions).
-- **For allergen queries in current query**: Extract additional allergens to EXCLUDE if explicitly mentioned:
-  - "nut-free" or "no nuts" → add ["peanuts", "tree_nuts"] to allergens.exclude
-  - "dairy-free" → add ["dairy"] to allergens.exclude
+- **CRITICAL - DO NOT FILTER USER ALLERGENS**: Even if context says "User is allergic to: X, Y, Z", DO NOT add them to allergens.exclude.
+  - User allergen preferences are handled by a separate compatibility scoring system.
+  - Leave allergens.exclude EMPTY unless the user explicitly requests allergen filtering in their current query.
+  - DO NOT extract allergens from dish descriptions, previous search results, or user allergen preferences.
+- **For allergen queries in current query**: Extract allergens to EXCLUDE ONLY if explicitly requested in the query:
+  - "show me nut-free dishes" or "no nuts" → add ["peanuts", "tree_nuts"] to allergens.exclude
+  - "show me dairy-free dishes" → add ["dairy"] to allergens.exclude
+  - "show me Italian dishes" (even with user allergic to peanuts in context) → allergens.exclude should be [] (empty)
   - "gluten-free" → add ["wheat_gluten"] to allergens.exclude
   - "shellfish-free" → add ["shellfish"] to allergens.exclude
-- **Combine user allergens with query allergens**: If user is allergic to peanuts and query asks for dairy-free, exclude both.
-- **DO NOT invent filters**: If query is "show me pizzas", leave allergens.exclude EMPTY (unless "User is allergic to:" is in context or query has restrictions).
+- **DO NOT invent filters**: If query is "show me pizzas", leave allergens.exclude EMPTY even if user has allergen preferences in context.
 
 Example 1:
 Query: "Show me chocolate dishes under 10 dollars."
@@ -517,25 +519,25 @@ Response:
   "nutrition": {{}}
 }}
 
-Example 7 (USER ALLERGEN PREFERENCES):
+Example 7 (USER ALLERGEN PREFERENCES - DO NOT FILTER):
 Query: "Show me pizzas"
 Context: "User is allergic to: peanuts, dairy"
 Response:
 {{
   "price": {{}},
   "ingredients": {{"include": [], "exclude": []}},
-  "allergens": {{"exclude": ["peanuts", "dairy"]}},
+  "allergens": {{"exclude": []}},  <-- IMPORTANT: Do NOT filter user allergens! Compatibility scoring will handle them.
   "nutrition": {{}}
 }}
 
-Example 8 (USER ALLERGENS + QUERY ALLERGENS):
+Example 8 (EXPLICIT QUERY ALLERGEN REQUEST):
 Query: "Show me gluten-free dishes"
 Context: "User is allergic to: shellfish, soy"
 Response:
 {{
   "price": {{}},
   "ingredients": {{"include": [], "exclude": []}},
-  "allergens": {{"exclude": ["shellfish", "soy", "wheat_gluten"]}},
+  "allergens": {{"exclude": ["wheat_gluten"]}},  <-- Only filter allergens explicitly mentioned in query, NOT user profile allergens
   "nutrition": {{}}
 }}
 

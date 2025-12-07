@@ -50,6 +50,27 @@ class NutritionFacts(BaseModel):
     sugar : Optional[Dict[str,Any]] = None
     fiber : Optional[Dict[str,Any]] = None
 
+class CompatibilityScoreBreakdown(BaseModel):
+    """
+    Detailed breakdown of AI compatibility score for a dish.
+
+    Attributes:
+        overall_score (int): Overall compatibility score 0-100.
+        allergen_safety (Dict[str, Any]): Allergen safety analysis.
+        nutrition_match (Dict[str, Any]): Nutrition matching with health goals.
+        taste_preference (Dict[str, Any]): Taste and cuisine preference match.
+        dietary_pattern (Dict[str, Any]): Dietary pattern alignment.
+        recommendation (str): AI-generated recommendation.
+        alternative_suggestions (List[Dict[str, Any]]): Better alternatives if score is low.
+    """
+    overall_score: int
+    allergen_safety: Dict[str, Any]
+    nutrition_match: Dict[str, Any]
+    taste_preference: Dict[str, Any]
+    dietary_pattern: Dict[str, Any]
+    recommendation: str
+    alternative_suggestions: List[Dict[str, Any]] = []
+
 class DishResult(BaseModel):
     """
     Represents a dish item retrieved from the database or a retrieval service.
@@ -66,6 +87,7 @@ class DishResult(BaseModel):
         availability (Optional[bool]): Availability status of the dish.
         serving_size (Optional[str]): The serving size or portion information.
         explicit_allergens (Optional[List[str]]): Explicitly mentioned allergens, if any.
+        compatibility_score (Optional[CompatibilityScoreBreakdown]): AI-powered compatibility analysis.
     """
     _id:str
     restaurant_id:str
@@ -78,6 +100,7 @@ class DishResult(BaseModel):
     availability : Optional[bool] = None
     serving_size : Optional[str] = None
     explicit_allergens : Optional[List[str]] = None
+    compatibility_score: Optional[CompatibilityScoreBreakdown] = None
 
 class InfoResult(BaseModel):
     """

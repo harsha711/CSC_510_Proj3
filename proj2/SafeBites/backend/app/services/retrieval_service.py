@@ -64,6 +64,5 @@ def get_menu_items(state):
             logger.error(f"Error processing query '{q}': {e}", exc_info=True)
             results[q] = []
             # raise GenericException(str(e))
-        
-    # return {"menu_results":results}
-    return MenuResultResponse(menu_results=results)
+
+    return {"menu_results": MenuResultResponse(menu_results=results)}
