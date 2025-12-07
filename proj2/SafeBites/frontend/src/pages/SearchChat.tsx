@@ -2,6 +2,44 @@ import { useState, useRef, useEffect } from 'react';
 import { API_BASE_URL } from '../config/api';
 import './SearchChat.css';
 
+interface CompatibilityScore {
+  overall_score: number;
+  allergen_safety: {
+    score: number;
+    level: 'SAFE' | 'WARNING' | 'UNSAFE';
+    detected_allergens: string[];
+    reasoning: string;
+  };
+  nutrition_match: {
+    score: number;
+    level: 'EXCELLENT' | 'GOOD' | 'MODERATE' | 'POOR';
+    matched_goals: string[];
+    conflicts: string[];
+    reasoning: string;
+  };
+  taste_preference: {
+    score: number;
+    level: 'EXCELLENT' | 'GOOD' | 'MODERATE' | 'POOR';
+    matched_cuisines: string[];
+    matched_tastes: string[];
+    reasoning: string;
+  };
+  dietary_pattern: {
+    score: number;
+    level: 'EXCELLENT' | 'GOOD' | 'MODERATE' | 'POOR';
+    user_pattern: string;
+    dish_category: string;
+    reasoning: string;
+  };
+  recommendation: string;
+  alternative_suggestions?: Array<{
+    dish_id: string;
+    dish_name: string;
+    score: number;
+    reason: string;
+  }>;
+}
+
 interface DishResult {
   dish_id: string;
   dish_name: string;
@@ -19,6 +57,7 @@ interface DishResult {
   };
   serving_size?: string;
   availaibility?: boolean | null;
+  compatibility_score?: CompatibilityScore;
 }
 
 interface Message {
@@ -34,6 +73,7 @@ function SearchChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -68,6 +108,52 @@ function SearchChat() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  // Clear session and start fresh conversation
+  const handleClearSession = async () => {
+    if (isClearing) return;
+
+    const confirmClear = window.confirm(
+      "Are you sure you want to start a fresh conversation? This will clear all chat history and context."
+    );
+
+    if (!confirmClear) return;
+
+    setIsClearing(true);
+
+    try {
+      const user_id = localStorage.getItem("authToken") || "guest";
+      const restaurant_id = "rest_1";
+
+      const response = await fetch(
+        `${API_BASE_URL}/restaurants/session/clear/${user_id}/${restaurant_id}`,
+        { method: 'DELETE' }
+      );
+
+      if (response.ok) {
+        // Clear local messages
+        setMessages([]);
+
+        // Add system message
+        const systemMessage: Message = {
+          id: Date.now().toString(),
+          type: 'assistant',
+          content: '✅ Chat session cleared! Starting fresh conversation with no previous context.',
+          timestamp: new Date()
+        };
+        setMessages([systemMessage]);
+
+        console.log('Session cleared successfully');
+      } else {
+        throw new Error('Failed to clear session');
+      }
+    } catch (error) {
+      console.error('Error clearing session:', error);
+      alert('Failed to clear session. Please try again.');
+    } finally {
+      setIsClearing(false);
     }
   };
 
@@ -150,10 +236,26 @@ function SearchChat() {
 
       console.log('=== PROCESSING RESPONSE ===');
 
-      // Extract menu results (dishes)
-      if (data.menu_results && Object.keys(data.menu_results).length > 0) {
-        console.log('Found menu_results:', data.menu_results);
-        
+      // NEW: Use the responses field if available (new format)
+      if (data.responses && Array.isArray(data.responses)) {
+        console.log('Found responses (new format):', data.responses);
+
+        data.responses.forEach((queryResponse: any) => {
+          if (queryResponse.type === 'menu_search' && Array.isArray(queryResponse.result)) {
+            console.log('Processing menu_search response:', queryResponse.result);
+            menuResults = [...menuResults, ...queryResponse.result];
+          }
+        });
+
+        if (menuResults.length > 0) {
+          assistantContent = `I found ${menuResults.length} dish${menuResults.length > 1 ? 'es' : ''} matching your search! 🍽️`;
+          console.log('Total dishes found:', menuResults.length);
+        }
+      }
+      // FALLBACK: Support old format for backwards compatibility
+      else if (data.menu_results && Object.keys(data.menu_results).length > 0) {
+        console.log('Found menu_results (old format):', data.menu_results);
+
         // menu_results is an object with queries as keys
         Object.entries(data.menu_results).forEach(([query, results]: [string, any]) => {
           console.log(`Processing query "${query}":`, results);
@@ -167,7 +269,7 @@ function SearchChat() {
           console.log('Total dishes found:', menuResults.length);
         }
       } else {
-        console.log('No menu_results in response');
+        console.log('No menu_results or responses in response');
       }
 
       // Extract info results (answers to questions)
@@ -303,7 +405,17 @@ function SearchChat() {
     <div className="search-chat-container">
       {/* Header with Instructions */}
       <div className="chat-header">
-        <h1 className="chat-title">Search Chat</h1>
+        <div className="chat-header-top">
+          <h1 className="chat-title">Search Chat</h1>
+          <button
+            className="clear-session-btn"
+            onClick={handleClearSession}
+            disabled={isClearing}
+            title="Clear conversation history and start fresh"
+          >
+            {isClearing ? '⏳ Clearing...' : '🔄 Start Fresh Chat'}
+          </button>
+        </div>
         <div className="chat-instructions">
           <h3>How to use:</h3>
           <ul>
@@ -390,6 +502,84 @@ function SearchChat() {
                               )}
                               {dish.nutrition_facts.carbohydrates && (
                                 <span> • {dish.nutrition_facts.carbohydrates.value}g carbs</span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* AI Compatibility Score */}
+                          {dish.compatibility_score && (
+                            <div className="compatibility-score-container">
+                              <div className="compatibility-header">
+                                <span className="compatibility-title">🤖 AI Compatibility Score</span>
+                                <span className={`compatibility-overall-score score-${Math.floor(dish.compatibility_score.overall_score / 20)}`}>
+                                  {dish.compatibility_score.overall_score}/100
+                                </span>
+                              </div>
+
+                              <div className="compatibility-breakdown">
+                                {/* Allergen Safety */}
+                                <div className="compatibility-item">
+                                  <span className={`compatibility-icon ${dish.compatibility_score.allergen_safety.level.toLowerCase()}`}>
+                                    {dish.compatibility_score.allergen_safety.level === 'SAFE' ? '✅' :
+                                     dish.compatibility_score.allergen_safety.level === 'WARNING' ? '⚠️' : '❌'}
+                                  </span>
+                                  <span className="compatibility-label">Allergen Safety:</span>
+                                  <span className="compatibility-value">{dish.compatibility_score.allergen_safety.score}/100</span>
+                                </div>
+
+                                {/* Nutrition Match */}
+                                <div className="compatibility-item">
+                                  <span className={`compatibility-icon ${dish.compatibility_score.nutrition_match.level.toLowerCase()}`}>
+                                    {dish.compatibility_score.nutrition_match.level === 'EXCELLENT' ? '✅' :
+                                     dish.compatibility_score.nutrition_match.level === 'GOOD' ? '✅' :
+                                     dish.compatibility_score.nutrition_match.level === 'MODERATE' ? '⚠️' : '❌'}
+                                  </span>
+                                  <span className="compatibility-label">Nutrition Match:</span>
+                                  <span className="compatibility-value">{dish.compatibility_score.nutrition_match.score}/100</span>
+                                </div>
+
+                                {/* Taste Preference */}
+                                <div className="compatibility-item">
+                                  <span className={`compatibility-icon ${dish.compatibility_score.taste_preference.level.toLowerCase()}`}>
+                                    {dish.compatibility_score.taste_preference.level === 'EXCELLENT' ? '✅' :
+                                     dish.compatibility_score.taste_preference.level === 'GOOD' ? '✅' :
+                                     dish.compatibility_score.taste_preference.level === 'MODERATE' ? '⚠️' : '❌'}
+                                  </span>
+                                  <span className="compatibility-label">Taste Match:</span>
+                                  <span className="compatibility-value">{dish.compatibility_score.taste_preference.score}/100</span>
+                                </div>
+
+                                {/* Dietary Pattern */}
+                                <div className="compatibility-item">
+                                  <span className={`compatibility-icon ${dish.compatibility_score.dietary_pattern.level.toLowerCase()}`}>
+                                    {dish.compatibility_score.dietary_pattern.level === 'EXCELLENT' ? '✅' :
+                                     dish.compatibility_score.dietary_pattern.level === 'GOOD' ? '✅' :
+                                     dish.compatibility_score.dietary_pattern.level === 'MODERATE' ? '⚠️' : '❌'}
+                                  </span>
+                                  <span className="compatibility-label">Diet Match:</span>
+                                  <span className="compatibility-value">{dish.compatibility_score.dietary_pattern.score}/100</span>
+                                </div>
+                              </div>
+
+                              {/* AI Recommendation */}
+                              <div className="compatibility-recommendation">
+                                <strong>💡 Recommendation:</strong>
+                                <p>{dish.compatibility_score.recommendation}</p>
+                              </div>
+
+                              {/* Alternative Suggestions */}
+                              {dish.compatibility_score.alternative_suggestions &&
+                               dish.compatibility_score.alternative_suggestions.length > 0 && (
+                                <div className="compatibility-alternatives">
+                                  <strong>🔄 Better Options:</strong>
+                                  {dish.compatibility_score.alternative_suggestions.map((alt, altIdx) => (
+                                    <div key={altIdx} className="alternative-item">
+                                      <span className="alternative-name">{alt.dish_name}</span>
+                                      <span className="alternative-score">({alt.score}/100)</span>
+                                      <p className="alternative-reason">{alt.reason}</p>
+                                    </div>
+                                  ))}
+                                </div>
                               )}
                             </div>
                           )}

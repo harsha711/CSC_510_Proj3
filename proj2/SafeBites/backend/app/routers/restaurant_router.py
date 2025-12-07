@@ -107,6 +107,32 @@ def chat_history(user_id:str, restaurant_id:str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.delete("/session/clear/{user_id}/{restaurant_id}")
+def clear_session(user_id: str, restaurant_id: str):
+    """
+    Clear/reset the chat session for a user and restaurant.
+    This creates a fresh session, removing all previous conversation context.
+
+    Args:
+        user_id (str): The user ID
+        restaurant_id (str): The restaurant ID
+
+    Returns:
+        JSONResponse: Success message with new session ID
+    """
+    try:
+        new_session_id = state_service.clear_and_create_new_session(user_id, restaurant_id)
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": "Session cleared successfully",
+                "session_id": new_session_id
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error clearing session: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/{restaurant_id}",response_model=RestaurantInDB)
 def get_restaurant(restaurant_id:str):
     """

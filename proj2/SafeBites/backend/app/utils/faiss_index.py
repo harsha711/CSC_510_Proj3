@@ -231,7 +231,7 @@ Nutrtion : {dish.get("nutrition_info",{})}
         vector_store.save_local("faiss_index_restaurant")
         print("FAISS index created and saved locally.")
 
-def search_dishes(query, restaurant_id=None,top_k=20,threshold=0.8):
+def search_dishes(query, restaurant_id=None,top_k=20,threshold=0.5):
     vector_store = FAISS.load_local("faiss_index_restaurant", embeddings,allow_dangerous_deserialization=True)
     filter_dict = {"restaurant_id":restaurant_id} if restaurant_id else None
     results = vector_store.similarity_search_with_score(query, k=top_k, filter=filter_dict)

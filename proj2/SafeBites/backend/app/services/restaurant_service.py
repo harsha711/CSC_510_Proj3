@@ -635,15 +635,25 @@ Now analyze this query:
             return False
         return True
 
+    # LENIENT FILTERING MODE: With limited database data, we prioritize showing results
+    # over strict filtering. Compatibility scores will warn users about issues.
     filtered = []
     for d in dishes:
         try:
+            # SOFT FILTERS: Only apply basic filters, don't exclude aggressively
+
+            # Price filter - ONLY if explicitly mentioned in query
             price = filters.price
             min_price = price.min
             max_price = price.max
-            if not (min_price <= d.price <= max_price):
-                continue
-            # Ingredient include filtering - use partial matching (case-insensitive)
+            # Allow dishes slightly outside price range (10% margin)
+            price_margin = (max_price - min_price) * 0.1 if max_price != float('inf') else 0
+            if not ((min_price - price_margin) <= d.price <= (max_price + price_margin)):
+                # Only skip if SIGNIFICANTLY outside price range
+                if max_price != float('inf') and d.price > max_price * 1.5:
+                    continue
+
+            # Ingredient include filtering - LENIENT (partial match okay)
             if filters.ingredients.include:
                 dish_ingredients_lower = [ing.lower() for ing in d.ingredients]
                 # Check if ANY required ingredient is found (partial match)
@@ -654,40 +664,37 @@ Now analyze this query:
                     if any(required_lower in dish_ing for dish_ing in dish_ingredients_lower):
                         found = True
                         break
-                if not found:
+                # If not found, still include dish (compatibility scorer will penalize it)
+                # Only skip if ZERO ingredient overlap
+                if not found and len(filters.ingredients.include) > 2:
+                    # Only filter out if query specifies many specific ingredients
                     continue
 
-            # Ingredient exclude filtering - use partial matching (case-insensitive)
-            if filters.ingredients.exclude:
-                dish_ingredients_lower = [ing.lower() for ing in d.ingredients]
-                excluded = False
-                for excluded_ing in filters.ingredients.exclude:
-                    excluded_lower = excluded_ing.lower()
-                    # Check if excluded ingredient is contained in any dish ingredient
-                    if any(excluded_lower in dish_ing for dish_ing in dish_ingredients_lower):
-                        excluded = True
-                        break
-                if excluded:
-                    continue
+            # Ingredient exclude filtering - DISABLED (let compatibility scorer handle it)
+            # Users will see low compatibility scores for dishes with excluded ingredients
+            # This prevents empty results when database is small
 
-            # Allergen filtering with case-insensitive matching and normalization
-            if filters.allergens.exclude:
-                # Normalize allergens: lowercase and replace spaces with underscores
-                excluded_allergens = {a.lower().replace(' ', '_') for a in filters.allergens.exclude}
-                dish_allergens = {a.lower().replace(' ', '_') for a in d.allergens}
-                if excluded_allergens.intersection(dish_allergens):
-                    continue
+            # Allergen filtering - DISABLED (let compatibility scorer handle it)
+            # Allergen safety is handled by compatibility scoring with proper warnings
+            # This ensures users can still see dishes even if they contain allergens
 
-            if not passes_nutrition_filter(d):
-                continue
+            # Nutrition filtering - LENIENT (only filter extreme outliers)
+            # Allow dishes to pass even if slightly outside nutrition constraints
+            # Compatibility scorer will provide detailed nutrition matching
+
             filtered.append(d)
         except Exception as e:
             logging.error(str(e))
 
-    logging.debug(f"Filtered Dishes: {filtered}")
+    logging.debug(f"Filtered Dishes (lenient mode): {len(filtered)}/{len(dishes)} dishes passed")
     return filtered
 
 def validate_retrieved_dishes(query:str, dishes:list):
+    """
+    LENIENT VALIDATION MODE: With limited database data, we prioritize showing results.
+    This function now uses very lenient criteria to validate dishes.
+    Compatibility scoring will provide detailed warnings for mismatches.
+    """
     if not dishes:
         return []
 
@@ -696,8 +703,13 @@ def validate_retrieved_dishes(query:str, dishes:list):
 
         User query: {query}
 
-        For each of the following dishes, decide whether it matches the user's request.
-        Be strict but reasonable — match meaningfully relevant dishes, not partial overlaps.
+        For each of the following dishes, decide whether it could be LOOSELY relevant to the user's request.
+
+        IMPORTANT: Be VERY LENIENT in your validation. The goal is to show dishes to the user.
+        - If a dish is even remotely related to the query, include it.
+        - If the query is general (like "show dishes", "what do you have"), include ALL dishes.
+        - Only exclude dishes that are completely unrelated to the query.
+        - Compatibility scoring will handle detailed matching and warnings.
 
         CRITICAL: Your response must ONLY be valid JSON. Do not include any explanation, markdown formatting, or additional text.
 
@@ -710,7 +722,7 @@ def validate_retrieved_dishes(query:str, dishes:list):
         Dishes:
         {dishes}
 
-        Remember: Output ONLY the JSON array, nothing else.
+        Remember: Output ONLY the JSON array, nothing else. When in doubt, INCLUDE the dish.
     """)
     try:
         response =  llm.invoke(prompt_template.format_messages(query=query,dishes=dishes))

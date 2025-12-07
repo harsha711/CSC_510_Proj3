@@ -4,7 +4,7 @@ Chat Session and State Management
 This module provides utilities for handling user chat sessions and persisting
 conversation states in the database.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
 from fastapi.encoders import jsonable_encoder
 from ..flow.state import ChatState
@@ -39,7 +39,7 @@ def get_or_create_session(user_id:str, restaurant_id:str):
 
     if existing_session:
         return existing_session["session_id"]
-    
+
 
     session_id = f"sess_{uuid.uuid4().hex[:10]}"
     sessions.insert_one({
@@ -48,6 +48,42 @@ def get_or_create_session(user_id:str, restaurant_id:str):
         "restaurant_id": restaurant_id,
         "active": True,
         "created_at": datetime.utcnow()
+    })
+    return session_id
+
+def clear_and_create_new_session(user_id: str, restaurant_id: str):
+    """
+    Clear the existing session and create a fresh new session for a user and restaurant.
+
+    This marks the current session as inactive and creates a brand new session,
+    effectively clearing all conversation history and context.
+
+    Parameters
+    ----------
+    user_id : str
+        Unique identifier of the user.
+    restaurant_id : str
+        Unique identifier of the restaurant.
+
+    Returns
+    -------
+    str
+        The session ID of the newly created session.
+    """
+    # Mark existing session as inactive
+    sessions.update_many(
+        {"user_id": user_id, "restaurant_id": restaurant_id, "active": True},
+        {"$set": {"active": False, "ended_at": datetime.now(timezone.utc)}}
+    )
+
+    # Create new session
+    session_id = f"sess_{uuid.uuid4().hex[:10]}"
+    sessions.insert_one({
+        "session_id": session_id,
+        "user_id": user_id,
+        "restaurant_id": restaurant_id,
+        "active": True,
+        "created_at": datetime.now(timezone.utc)
     })
     return session_id
 

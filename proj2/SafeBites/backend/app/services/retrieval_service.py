@@ -35,10 +35,15 @@ def get_menu_items(state):
     for q in query_parts:
         logging.debug(f"Retrieving menu items for query: {q} and restaurant_id: {restaurant_id}")
         try:
+            # Store original query for logging
+            original_query = q
             if state.current_context:
                 logging.debug(f"Appending current context to query: {state.current_context}")
                 q = f"{q}\n\nAdditional context:\n{state.current_context}"
+
+            logger.info(f"Searching FAISS for: '{original_query}' (restaurant: {restaurant_id})")
             hits = semantic_retrieve_with_negation(q, restaurant_id)
+            logger.info(f"FAISS returned {len(hits)} dishes")
             logging.debug(f"Retrieved data from semantic search: {hits}")
             dish_results = [DishData(
                 dish_id=hit.dish["_id"],
@@ -56,10 +61,19 @@ def get_menu_items(state):
                 logger.warning(f"No dishes found for query= {q}")
                 results[q] = []
                 continue
-            
+
+            logger.info(f"Retrieved {len(dish_results)} dishes from semantic search")
+
+            # Apply lenient filtering
             dish_results = apply_filters(q,dish_results)
-            dish_results = validate_retrieved_dishes(q,dish_results)
+            logger.info(f"After lenient filtering: {len(dish_results)} dishes")
+
+            # TEMPORARILY DISABLED: LLM validation is too strict with limited data
+            # Let compatibility scoring handle relevance and quality checks
+            # dish_results = validate_retrieved_dishes(q,dish_results)
+
             results[q] = dish_results
+            logger.info(f"Final dish count for query '{q}': {len(dish_results)}")
         except Exception as e:
             logger.error(f"Error processing query '{q}': {e}", exc_info=True)
             results[q] = []

@@ -15,6 +15,12 @@ function Settings() {
   const [allergies, setAllergies] = useState<string[]>([]);
   const [newAllergy, setNewAllergy] = useState('');
 
+  // Dietary Preferences for AI Compatibility Scoring
+  const [healthGoals, setHealthGoals] = useState<string[]>([]);
+  const [cuisinePreferences, setCuisinePreferences] = useState<string[]>([]);
+  const [tastePreferences, setTastePreferences] = useState<string[]>([]);
+  const [dietaryPattern, setDietaryPattern] = useState<string>('omnivore');
+
   // Temporary states for editing
   const [tempUsername, setTempUsername] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -50,11 +56,17 @@ function Settings() {
 
       const userData = await response.json();
       console.log('User data:', userData);
-      
+
       setUsername(userData.username || storedUsername);
       setName(userData.name || 'User');
       setTempUsername(userData.username || storedUsername);
       setAllergies(userData.allergen_preferences || []);
+
+      // Load dietary preferences for AI compatibility scoring
+      setHealthGoals(userData.health_goals || []);
+      setCuisinePreferences(userData.cuisine_preferences || []);
+      setTastePreferences(userData.taste_preferences || []);
+      setDietaryPattern(userData.dietary_pattern || 'omnivore');
     } catch (error) {
       console.error('Error fetching user data:', error);
       // Use fallback data from localStorage
@@ -120,7 +132,7 @@ function Settings() {
     setIsSaving(true);
     try {
       const authToken = localStorage.getItem('authToken');
-      
+
       const response = await fetch(API_ENDPOINTS.users.me, {
         method: 'PUT',
         headers: {
@@ -143,6 +155,49 @@ function Settings() {
       alert('Failed to save allergies. Please try again.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSaveDietaryPreferences = async () => {
+    setIsSaving(true);
+    try {
+      const authToken = localStorage.getItem('authToken');
+
+      const response = await fetch(API_ENDPOINTS.users.me, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken || 'token'}`
+        },
+        body: JSON.stringify({
+          name: name,
+          allergen_preferences: allergies,
+          health_goals: healthGoals,
+          cuisine_preferences: cuisinePreferences,
+          taste_preferences: tastePreferences,
+          dietary_pattern: dietaryPattern
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update dietary preferences');
+      }
+
+      alert('✅ Dietary preferences saved! Your AI compatibility scores will now be personalized.');
+      console.log('Dietary preferences updated successfully');
+    } catch (error) {
+      console.error('Error updating dietary preferences:', error);
+      alert('Failed to save dietary preferences. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const toggleArrayItem = (array: string[], item: string, setArray: (arr: string[]) => void) => {
+    if (array.includes(item)) {
+      setArray(array.filter(i => i !== item));
+    } else {
+      setArray([...array, item]);
     }
   };
 
@@ -325,6 +380,122 @@ function Settings() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* AI Compatibility Preferences Section */}
+      <div className="settings-section">
+        <div className="section-header">
+          <h2>🤖 AI Compatibility Preferences</h2>
+          <p className="section-description">
+            Customize your dietary profile to get personalized AI-powered dish recommendations
+          </p>
+          {isSaving && <span className="saving-indicator">Saving...</span>}
+        </div>
+
+        <div className="settings-card">
+          {/* Dietary Pattern */}
+          <div className="settings-info-row">
+            <div className="settings-info-label">
+              <strong>Dietary Pattern</strong>
+              <span className="info-description">Your primary eating style</span>
+            </div>
+            <div className="settings-info-value">
+              <select
+                value={dietaryPattern}
+                onChange={(e) => setDietaryPattern(e.target.value)}
+                className="dietary-select"
+              >
+                <option value="omnivore">Omnivore</option>
+                <option value="vegetarian">Vegetarian</option>
+                <option value="vegan">Vegan</option>
+                <option value="pescatarian">Pescatarian</option>
+                <option value="keto">Keto</option>
+                <option value="paleo">Paleo</option>
+                <option value="mediterranean">Mediterranean</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Health Goals */}
+          <div className="settings-info-row preferences-row">
+            <div className="settings-info-label">
+              <strong>Health Goals</strong>
+              <span className="info-description">What you're trying to achieve</span>
+            </div>
+            <div className="settings-info-value">
+              <div className="checkbox-grid">
+                {['low-carb', 'high-protein', 'low-fat', 'low-sodium', 'high-fiber', 'low-sugar'].map(goal => (
+                  <label key={goal} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={healthGoals.includes(goal)}
+                      onChange={() => toggleArrayItem(healthGoals, goal, setHealthGoals)}
+                    />
+                    <span>{goal}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Cuisine Preferences */}
+          <div className="settings-info-row preferences-row">
+            <div className="settings-info-label">
+              <strong>Favorite Cuisines</strong>
+              <span className="info-description">Types of food you enjoy</span>
+            </div>
+            <div className="settings-info-value">
+              <div className="checkbox-grid">
+                {['Italian', 'Mexican', 'Chinese', 'Indian', 'Japanese', 'Mediterranean', 'Thai', 'American'].map(cuisine => (
+                  <label key={cuisine} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={cuisinePreferences.includes(cuisine)}
+                      onChange={() => toggleArrayItem(cuisinePreferences, cuisine, setCuisinePreferences)}
+                    />
+                    <span>{cuisine}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Taste Preferences */}
+          <div className="settings-info-row preferences-row">
+            <div className="settings-info-label">
+              <strong>Taste Preferences</strong>
+              <span className="info-description">Flavors you prefer</span>
+            </div>
+            <div className="settings-info-value">
+              <div className="checkbox-grid">
+                {['spicy', 'savory', 'sweet', 'sour', 'umami', 'bitter'].map(taste => (
+                  <label key={taste} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={tastePreferences.includes(taste)}
+                      onChange={() => toggleArrayItem(tastePreferences, taste, setTastePreferences)}
+                    />
+                    <span>{taste}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <div className="settings-save-section">
+            <button
+              className="settings-save-preferences-btn"
+              onClick={handleSaveDietaryPreferences}
+              disabled={isSaving}
+            >
+              {isSaving ? 'Saving...' : '💾 Save Dietary Preferences'}
+            </button>
+            <p className="save-help-text">
+              These preferences power our AI to give you personalized compatibility scores for every dish!
+            </p>
           </div>
         </div>
       </div>

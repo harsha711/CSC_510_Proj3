@@ -11,7 +11,11 @@ function SignUp() {
         username: "",
         password: "",
         confirmPassword: "",
-        allergenPreferences: [] as string[]
+        allergenPreferences: [] as string[],
+        dietaryPattern: "omnivore",
+        healthGoals: [] as string[],
+        cuisinePreferences: [] as string[],
+        tastePreferences: [] as string[]
     });
 
     const commonAllergens = [
@@ -33,6 +37,15 @@ function SignUp() {
             allergenPreferences: prev.allergenPreferences.includes(allergen)
                 ? prev.allergenPreferences.filter(a => a !== allergen)
                 : [...prev.allergenPreferences, allergen]
+        }));
+    };
+
+    const toggleArrayItem = (field: 'healthGoals' | 'cuisinePreferences' | 'tastePreferences', item: string) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: prev[field].includes(item)
+                ? prev[field].filter((i: string) => i !== item)
+                : [...prev[field], item]
         }));
     };
 
@@ -61,7 +74,11 @@ function SignUp() {
                     name: formData.name,
                     username: formData.username,
                     password: formData.password,
-                    allergen_preferences: formData.allergenPreferences
+                    allergen_preferences: formData.allergenPreferences,
+                    dietary_pattern: formData.dietaryPattern,
+                    health_goals: formData.healthGoals,
+                    cuisine_preferences: formData.cuisinePreferences,
+                    taste_preferences: formData.tastePreferences
                 })
             });
 
@@ -174,6 +191,80 @@ function SignUp() {
                                     {allergen}
                                 </button>
                             ))}
+                        </div>
+                    </div>
+
+                    {/* AI Preferences Section */}
+                    <div className="form-group preferences-section">
+                        <label>🤖 AI Preferences (Optional)</label>
+                        <p className="allergen-description">Get personalized dish recommendations</p>
+
+                        {/* Dietary Pattern */}
+                        <div className="preference-subsection">
+                            <label className="preference-label">Dietary Pattern</label>
+                            <select
+                                value={formData.dietaryPattern}
+                                onChange={(e) => setFormData(prev => ({ ...prev, dietaryPattern: e.target.value }))}
+                                className="dietary-select"
+                            >
+                                <option value="omnivore">Omnivore</option>
+                                <option value="vegetarian">Vegetarian</option>
+                                <option value="vegan">Vegan</option>
+                                <option value="pescatarian">Pescatarian</option>
+                                <option value="keto">Keto</option>
+                                <option value="paleo">Paleo</option>
+                            </select>
+                        </div>
+
+                        {/* Health Goals */}
+                        <div className="preference-subsection">
+                            <label className="preference-label">Health Goals</label>
+                            <div className="preference-grid">
+                                {['low-carb', 'high-protein', 'low-fat'].map((goal) => (
+                                    <button
+                                        key={goal}
+                                        type="button"
+                                        className={`preference-btn ${formData.healthGoals.includes(goal) ? 'selected' : ''}`}
+                                        onClick={() => toggleArrayItem('healthGoals', goal)}
+                                    >
+                                        {goal}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Cuisine Preferences */}
+                        <div className="preference-subsection">
+                            <label className="preference-label">Favorite Cuisines</label>
+                            <div className="preference-grid">
+                                {['Italian', 'Mexican', 'Chinese', 'Indian'].map((cuisine) => (
+                                    <button
+                                        key={cuisine}
+                                        type="button"
+                                        className={`preference-btn ${formData.cuisinePreferences.includes(cuisine) ? 'selected' : ''}`}
+                                        onClick={() => toggleArrayItem('cuisinePreferences', cuisine)}
+                                    >
+                                        {cuisine}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Taste Preferences */}
+                        <div className="preference-subsection">
+                            <label className="preference-label">Taste Preferences</label>
+                            <div className="preference-grid">
+                                {['spicy', 'savory', 'sweet', 'sour'].map((taste) => (
+                                    <button
+                                        key={taste}
+                                        type="button"
+                                        className={`preference-btn ${formData.tastePreferences.includes(taste) ? 'selected' : ''}`}
+                                        onClick={() => toggleArrayItem('tastePreferences', taste)}
+                                    >
+                                        {taste}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
