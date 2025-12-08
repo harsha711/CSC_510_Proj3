@@ -31,7 +31,7 @@ dish_collection = db["dishes"]
 
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large",openai_api_key=os.getenv("OPENAI_KEY"))
 embedding_dim = 1536
-llm = ChatOpenAI(model="gpt-4o-mini",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"),callbacks=[LLMUsageTracker()])
+llm = ChatOpenAI(model="gpt-4o-mini",temperature=0,openai_api_key=os.getenv("OPENAI_KEY"),callbacks=[LLMUsageTracker()])
     
 
 def extract_query_intent(query):
@@ -50,44 +50,19 @@ def extract_query_intent(query):
     logging.debug(f"Extracting intents for query: {query}")
 
     intent_prompt = ChatPromptTemplate.from_template("""
-        You are an intent extraction expert for food-related natural language queries.
+Extract food search intents as JSON. Return format: {{"positive": [...], "negative": [...]}}
 
-        Your job is to split the query into two lists:
-        1. **Positive intents** — what the user explicitly wants or is open to.
-        - Expand this list semantically (include closely related dishes, cuisines, or styles).
-        2. **Negative intents** — what the user explicitly wants to exclude or avoid.
-        - DO NOT over-expand. Keep this list narrowly focused on the specific items, ingredients, or categories mentioned.
-        - Avoid including loosely related or parent-category terms.
-        - Only include synonyms or direct variants (e.g., "meatballs" → ["meatball", "meat balls", "polpette"], not "beef" or "meat").
-        - **IMPORTANT**: For allergen-based exclusions (e.g., "nut-free", "dairy-free", "no peanuts"),
-          DO NOT add allergens to the negative list. Leave negative list EMPTY for allergen queries.
-          Allergen filtering will be handled by a separate filter system.
+Rules:
+- Positive: what user wants (expand with synonyms/variations)
+- Negative: what to exclude (keep narrow, only exact exclusions)
+- For allergen queries (e.g. "nut-free"), leave negative EMPTY
 
-        Return the result as **valid JSON**:
-        {{"positive": [...], "negative": [...]}}
+Examples:
+"pasta without meatballs" → {{"positive": ["pasta", "spaghetti", "penne"], "negative": ["meatballs"]}}
+"show me pizza" → {{"positive": ["pizza", "margherita", "pepperoni"], "negative": []}}
 
-        Example 1:
-        Query: "Gluten-free dishes without cheese"
-        Output: {{"positive": ["anything", "gluten-free"], "negative": ["cheese", "dairy cheese", "cheddar", "mozzarella"]}}
-
-        Example 2:
-        Query: "Pasta dishes without meatballs"
-        Output: {{"positive": ["pasta dishes", "pasta", "spaghetti", "penne", "fettuccine"], "negative": ["meatballs", "meatball", "meat balls", "polpette"]}}
-
-        Example 3:
-        Query: "Anything but seafood"
-        Output: {{"positive": ["anything", "non-seafood", "meat and poultry", "vegetarian", "vegan"], "negative": ["seafood", "fish", "shellfish", "prawns", "crab"]}}
-
-        Example 4 (ALLERGEN QUERY):
-        Query: "List nut-free dishes"
-        Output: {{"positive": ["nut-free dishes", "dishes without nuts", "allergen-free"], "negative": []}}
-
-        Example 5 (ALLERGEN QUERY):
-        Query: "Show me dairy-free options"
-        Output: {{"positive": ["dairy-free", "lactose-free", "non-dairy", "vegan"], "negative": []}}
-
-        Query: {query}
-    """)
+Query: {query}
+""")
     try:
         response =  llm.invoke(intent_prompt.format_messages(query=query))
 
@@ -256,7 +231,7 @@ def update_faiss_index(new_dishes,index_path="faiss_index_restaurant"):
     except Exception as e:
         logger.error(f"Failed to update FAISS index : {str(e)}")
 
-def search_dishes(query, restaurant_id=None,top_k=20,threshold=0.5):
+def search_dishes(query, restaurant_id=None,top_k=20,threshold=2.0):
     """
     Perform similarity search using FAISS vector store.
 
@@ -264,7 +239,8 @@ def search_dishes(query, restaurant_id=None,top_k=20,threshold=0.5):
         query (str): Search query.
         restaurant_id (Optional[str]): Filter dishes by restaurant.
         top_k (int): Max number of results.
-        threshold (float): Minimum similarity score to include. Default 0.5 for better recall.
+        threshold (float): Maximum L2 distance to include. Default 2.0 for better recall.
+                          Lower values = stricter matching. FAISS uses L2 distance (lower is better).
 
     Returns:
         List[DishHit]: Filtered and structured dish hits.
@@ -279,7 +255,8 @@ def search_dishes(query, restaurant_id=None,top_k=20,threshold=0.5):
     structured_res = []
 
     for res,score in results:
-        if score >= threshold:
+        # FAISS returns L2 distance (lower is better), so use <= instead of >=
+        if score <= threshold:
             dish = dish_collection.find_one({"_id":res.metadata["dish_id"]})
             if dish:
                 structured_res.append(DishHit(
@@ -322,7 +299,7 @@ def semantic_retrieve_with_negation(query,restaurant_id=None):
 
     Args:
         query (str): User query text.
-        restaurant_id (Optional[str]): Filter by restaurant ID.
+        restaurant_id (Optional[str]): Filter by restaurant ID (IGNORED - searches across all restaurants).
 
     Returns:
         List[DishHit]: Refined and filtered dish hits.
@@ -334,13 +311,15 @@ def semantic_retrieve_with_negation(query,restaurant_id=None):
 
     pos_hits, neg_hits = [],[]
 
+    # IMPORTANT: Search across ALL restaurants (restaurant_id=None) for better results
+    # Users expect to see all relevant dishes, not just from one restaurant
     for p in intents.positive:
-        hits = search_dishes(p,restaurant_id=restaurant_id)
+        hits = search_dishes(p, restaurant_id=None)
         logger.info(f"Positive intent '{p}' returned {len(hits)} dishes")
         pos_hits.extend(hits)
 
     for n in intents.negative:
-        hits = search_dishes(n,restaurant_id=restaurant_id)
+        hits = search_dishes(n, restaurant_id=None)
         logger.info(f"Negative intent '{n}' returned {len(hits)} dishes (will be excluded)")
         neg_hits.extend(hits)
 

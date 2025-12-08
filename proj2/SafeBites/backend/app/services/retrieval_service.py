@@ -37,9 +37,12 @@ def get_menu_items(state):
         try:
             # Store original query for logging
             original_query = q
-            if state.current_context:
-                logging.debug(f"Appending current context to query: {state.current_context}")
-                q = f"{q}\n\nAdditional context:\n{state.current_context}"
+
+            # DO NOT append current_context to FAISS query - it confuses semantic search
+            # Context should only be used AFTER retrieval for filtering/scoring
+            # if state.current_context:
+            #     logging.debug(f"Appending current context to query: {state.current_context}")
+            #     q = f"{q}\n\nAdditional context:\n{state.current_context}"
 
             logger.info(f"Searching FAISS for: '{original_query}' (restaurant: {restaurant_id})")
             hits = semantic_retrieve_with_negation(q, restaurant_id)
@@ -48,6 +51,7 @@ def get_menu_items(state):
             dish_results = [DishData(
                 dish_id=hit.dish["_id"],
                 dish_name=hit.dish["name"],
+                restaurant_id=hit.dish.get("restaurant_id"),
                 description=hit.dish["description"],
                 price=hit.dish["price"],
                 ingredients=hit.dish["ingredients"],

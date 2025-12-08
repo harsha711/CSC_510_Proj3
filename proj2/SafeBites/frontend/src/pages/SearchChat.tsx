@@ -41,12 +41,12 @@ interface CompatibilityScore {
 }
 
 interface DishResult {
-  dish_id: string;
-  dish_name: string;
+  _id: string;
+  name: string;
   description: string;
   price: number;
   ingredients: string[];
-  allergens: string[];
+  explicit_allergens?: string[];
   nutrition_facts?: {
     calories?: { value: number; confidence?: number };
     protein?: { value: number; confidence?: number };
@@ -56,7 +56,7 @@ interface DishResult {
     fiber?: { value: number; confidence?: number };
   };
   serving_size?: string;
-  availaibility?: boolean | null;
+  availability?: boolean | null;
   compatibility_score?: CompatibilityScore;
 }
 
@@ -461,9 +461,9 @@ function SearchChat() {
                   {message.menuResults && message.menuResults.length > 0 && (
                     <div className="results-container">
                       {message.menuResults.map((dish, idx) => (
-                        <div key={dish.dish_id || idx} className="result-card">
+                        <div key={dish._id || idx} className="result-card">
                           <div className="result-header">
-                            <h4 className="result-name">{dish.dish_name}</h4>
+                            <h4 className="result-name">{dish.name}</h4>
                             <span className="result-price">${dish.price.toFixed(2)}</span>
                           </div>
                           
@@ -477,11 +477,11 @@ function SearchChat() {
                           )}
                           
                           {/* Allergens */}
-                          {dish.allergens && dish.allergens.length > 0 && (
+                          {dish.explicit_allergens && dish.explicit_allergens.length > 0 && (
                             <div className="result-allergens">
                               <strong>Allergens:</strong>
                               <div className="allergen-tags">
-                                {dish.allergens.map((allergen, aIdx) => (
+                                {dish.explicit_allergens.map((allergen: string, aIdx: number) => (
                                   <span key={aIdx} className="allergen-tag">
                                     {allergen}
                                   </span>
@@ -510,7 +510,10 @@ function SearchChat() {
                           {dish.compatibility_score && (
                             <div className="compatibility-score-container">
                               <div className="compatibility-header">
-                                <span className="compatibility-title">🤖 AI Compatibility Score</span>
+                                <div className="compatibility-title-section">
+                                  <span className="compatibility-title">🤖 AI Compatibility Score</span>
+                                  <span className="compatibility-dish-name">for {dish.name}</span>
+                                </div>
                                 <span className={`compatibility-overall-score score-${Math.floor(dish.compatibility_score.overall_score / 20)}`}>
                                   {dish.compatibility_score.overall_score}/100
                                 </span>

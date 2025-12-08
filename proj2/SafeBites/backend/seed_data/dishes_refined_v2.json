@@ -1,0 +1,2937 @@
+[
+  {
+    "_id": "dish_1",
+    "restaurant_id": "rest_1",
+    "name": "Szechuan Beef",
+    "description": "Stir-fried Szechuan-style beef marinated with egg white and cornstarch, cooked with vegetables in soy and oyster sauces and finished with sesame oil.",
+    "price": 15.56,
+    "ingredients": [
+      "Beef",
+      "Salt",
+      "Sesame Seed Oil",
+      "Pepper",
+      "Egg White",
+      "Starch",
+      "Oil",
+      "Ginger",
+      "Garlic",
+      "Onion",
+      "Carrots",
+      "Green Pepper",
+      "Celery",
+      "Mushrooms",
+      "Cooking wine",
+      "Water",
+      "Oyster Sauce",
+      "Hotsauce",
+      "Sugar",
+      "Soy Sauce"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "egg",
+        "confidence": 0.99,
+        "why": "Egg white is used in the beef marinade."
+      },
+      {
+        "allergen": "soy",
+        "confidence": 0.99,
+        "why": "Soy sauce is listed among the ingredients."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.9,
+        "why": "Most soy sauces (and some oyster sauces) contain wheat unless specifically gluten-free."
+      },
+      {
+        "allergen": "shellfish",
+        "confidence": 0.96,
+        "why": "Oyster sauce typically contains oyster extract (shellfish)."
+      },
+      {
+        "allergen": "sesame",
+        "confidence": 0.9,
+        "why": "Sesame seed oil is used in the marinade."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 630,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 38,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 40,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 30,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 10,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_2",
+    "restaurant_id": "rest_1",
+    "name": "Prawn & Fennel Bisque",
+    "description": "A creamy seafood bisque of prawns and fennel simmered with aromatics, tomatoes, wine, and fish stock, finished with double cream.",
+    "price": 6.84,
+    "ingredients": [
+      "Tiger Prawns",
+      "Olive Oil",
+      "Onion",
+      "Fennel",
+      "Carrots",
+      "Dry White Wine",
+      "Brandy",
+      "Chopped Tomatoes",
+      "Fish Stock",
+      "Paprika",
+      "Double Cream",
+      "Prawns"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "shellfish",
+        "confidence": 0.99,
+        "why": "Contains prawns (shellfish) explicitly listed in ingredients."
+      },
+      {
+        "allergen": "fish",
+        "confidence": 0.95,
+        "why": "Contains fish stock, which is derived from fish."
+      },
+      {
+        "allergen": "dairy",
+        "confidence": 0.9,
+        "why": "Contains double cream, a dairy product."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 380,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 22,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 30,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 16,
+        "confidence": 0.55
+      },
+      "sugar": {
+        "value": 8,
+        "confidence": 0.55
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.55
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_3",
+    "restaurant_id": "rest_1",
+    "name": "English Breakfast",
+    "description": "A hearty full English breakfast with sausages, bacon, eggs, black pudding, grilled mushrooms and tomatoes, and bread.",
+    "price": 17.79,
+    "ingredients": [
+      "Sausages",
+      "Bacon",
+      "Mushrooms",
+      "Tomatoes",
+      "Black Pudding",
+      "Eggs",
+      "Bread"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "egg",
+        "confidence": 0.99,
+        "why": "Whole eggs are listed as an ingredient."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.99,
+        "why": "Bread typically contains wheat; sausages and black pudding may also include wheat-based rusk."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 855,
+        "confidence": 0.7
+      },
+      "protein": {
+        "value": 56,
+        "confidence": 0.65
+      },
+      "fat": {
+        "value": 63,
+        "confidence": 0.65
+      },
+      "carbohydrates": {
+        "value": 35,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 7,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_4",
+    "restaurant_id": "rest_1",
+    "name": "Shawarma",
+    "description": "Yogurt-marinated, spice-rubbed chicken shawarma served in pita with lettuce and tomato.",
+    "price": 12.99,
+    "ingredients": [
+      "Chicken Thighs",
+      "Coriander",
+      "Cumin",
+      "Cardamom",
+      "Cayenne Pepper",
+      "Paprika",
+      "Lemon Juice",
+      "Olive Oil",
+      "Greek Yogurt",
+      "Garlic Clove",
+      "Cumin",
+      "Lemon Juice",
+      "Lettuce",
+      "Tomato",
+      "Pita Bread"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "Contains Greek yogurt in the marinade."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.98,
+        "why": "Includes pita bread, typically made from wheat flour containing gluten."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 570,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 48,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 23,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 41,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.55
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.55
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_5",
+    "restaurant_id": "rest_1",
+    "name": "Moussaka",
+    "description": "Greek-style baked casserole of beef, aubergine, tomato and potatoes topped with a yogurt-egg-parmesan layer.",
+    "price": 26.21,
+    "ingredients": [
+      "Beef",
+      "Aubergine",
+      "Greek Yogurt",
+      "Egg",
+      "Parmesan",
+      "Tomato",
+      "Tomato Puree",
+      "Potatoes"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.98,
+        "why": "Contains Greek yogurt and parmesan cheese."
+      },
+      {
+        "allergen": "egg",
+        "confidence": 0.98,
+        "why": "Egg is listed and used in the topping mixture."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 620,
+        "confidence": 0.55
+      },
+      "protein": {
+        "value": 46,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 32,
+        "confidence": 0.55
+      },
+      "carbohydrates": {
+        "value": 37,
+        "confidence": 0.55
+      },
+      "sugar": {
+        "value": 9,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 6,
+        "confidence": 0.55
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_6",
+    "restaurant_id": "rest_1",
+    "name": "Beef Brisket Pot Roast",
+    "description": "Hearty slow-braised beef brisket pot roast with onions, garlic, herbs, carrots, potatoes, beef stock, and a touch of mustard.",
+    "price": 12.41,
+    "ingredients": [
+      "Beef Brisket",
+      "Salt",
+      "Onion",
+      "Garlic",
+      "Thyme",
+      "Rosemary",
+      "Bay Leaves",
+      "beef stock",
+      "Carrots",
+      "Mustard",
+      "Potatoes"
+    ],
+    "inferred_allergens": [],
+    "nutrition_facts": {
+      "calories": {
+        "value": 650,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 40,
+        "confidence": 0.55
+      },
+      "fat": {
+        "value": 38,
+        "confidence": 0.55
+      },
+      "carbohydrates": {
+        "value": 32,
+        "confidence": 0.5
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_7",
+    "restaurant_id": "rest_1",
+    "name": " Bubble & Squeak",
+    "description": "A classic British hash of fried potatoes and Brussels sprouts with bacon, onion, garlic, and butter.",
+    "price": 25.93,
+    "ingredients": [
+      "Butter",
+      "Bacon",
+      "Onion",
+      "Garlic Clove",
+      "Brussels Sprouts",
+      "Potatoes"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.98,
+        "why": "Butter is listed as an ingredient and contains milk."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 500,
+        "confidence": 0.62
+      },
+      "protein": {
+        "value": 21,
+        "confidence": 0.62
+      },
+      "fat": {
+        "value": 23,
+        "confidence": 0.62
+      },
+      "carbohydrates": {
+        "value": 53,
+        "confidence": 0.62
+      },
+      "sugar": {
+        "value": 7,
+        "confidence": 0.62
+      },
+      "fiber": {
+        "value": 8,
+        "confidence": 0.62
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_8",
+    "restaurant_id": "rest_1",
+    "name": "Tuna Nicoise",
+    "description": "A hearty tuna Ni\u00e7oise-style dish with roasted potatoes, boiled egg, spinach, red onion, capers, and a red wine vinegar dressing.",
+    "price": 12.36,
+    "ingredients": [
+      "Potatoes",
+      "Olive Oil",
+      "Eggs",
+      "Red Wine Vinegar",
+      "Capers",
+      "Sunflower Oil",
+      "Red Onions",
+      "Spinach",
+      "Tuna"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "fish",
+        "confidence": 0.99,
+        "why": "Contains tuna, which is a fish."
+      },
+      {
+        "allergen": "egg",
+        "confidence": 0.99,
+        "why": "Contains eggs as listed and described."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 580,
+        "confidence": 0.55
+      },
+      "protein": {
+        "value": 38,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 28,
+        "confidence": 0.55
+      },
+      "carbohydrates": {
+        "value": 41,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 4,
+        "confidence": 0.6
+      },
+      "fiber": {
+        "value": 5,
+        "confidence": 0.6
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_9",
+    "restaurant_id": "rest_1",
+    "name": "Tonkatsu pork",
+    "description": "Crispy breaded and deep-fried pork cutlet served with a sweet-tangy katsu-style sauce.",
+    "price": 6.33,
+    "ingredients": [
+      "Pork Chops",
+      "Flour",
+      "Eggs",
+      "Breadcrumbs",
+      "Vegetable Oil",
+      "Tomato Ketchup",
+      "Worcestershire Sauce",
+      "Oyster Sauce",
+      "Caster Sugar"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.99,
+        "why": "Contains flour and breadcrumbs, which are wheat-based and contain gluten."
+      },
+      {
+        "allergen": "egg",
+        "confidence": 0.99,
+        "why": "Eggs are listed and used for dredging the cutlet."
+      },
+      {
+        "allergen": "fish",
+        "confidence": 0.96,
+        "why": "Worcestershire sauce typically contains anchovies (fish)."
+      },
+      {
+        "allergen": "shellfish",
+        "confidence": 0.96,
+        "why": "Oyster sauce contains oysters, which are shellfish."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 745,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 43,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 39,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 43,
+        "confidence": 0.55
+      },
+      "sugar": {
+        "value": 18,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 2,
+        "confidence": 0.4
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_10",
+    "restaurant_id": "rest_1",
+    "name": "Shakshuka",
+    "description": "Tomato-chilli skillet with poached eggs and feta, simmered with onions, garlic, and coriander.",
+    "price": 13.71,
+    "ingredients": [
+      "Olive Oil",
+      "Red Onions",
+      "Red Chilli",
+      "Garlic",
+      "Coriander",
+      "Cherry Tomatoes",
+      "Caster Sugar",
+      "Eggs",
+      "Feta"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "egg",
+        "confidence": 0.99,
+        "why": "Eggs are explicitly listed and are a core component of shakshuka."
+      },
+      {
+        "allergen": "dairy",
+        "confidence": 0.98,
+        "why": "Feta cheese (made from milk) is included in the ingredients."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 400,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 19,
+        "confidence": 0.7
+      },
+      "fat": {
+        "value": 28,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 18,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 10,
+        "confidence": 0.6
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_11",
+    "restaurant_id": "rest_1",
+    "name": "Lancashire hotpot",
+    "description": "A traditional British lamb and kidney hotpot baked with onions, carrots, and a potato topping in a rich gravy.",
+    "price": 14.38,
+    "ingredients": [
+      "Butter",
+      "Lamb",
+      "Lamb Kidney",
+      "Onions",
+      "Carrots",
+      "Plain Flour",
+      "Worcestershire Sauce",
+      "Chicken Stock",
+      "Bay Leaves",
+      "Potatoes"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "Contains butter, a dairy product."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.99,
+        "why": "Contains plain flour, which is typically wheat-based and contains gluten."
+      },
+      {
+        "allergen": "fish",
+        "confidence": 0.85,
+        "why": "Worcestershire sauce commonly contains anchovies (fish), depending on brand."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 650,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 42,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 38,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 55,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 9,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 6,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_12",
+    "restaurant_id": "rest_1",
+    "name": "Fish pie",
+    "description": "A creamy fish pie with white fish, prawns, leek, and potato, enriched with milk, cream, and Gruy\u00e8re.",
+    "price": 8.92,
+    "ingredients": [
+      "Floury Potatoes",
+      "Olive Oil",
+      "Semi-skimmed Milk",
+      "White Fish Fillets",
+      "Plain flour",
+      "Nutmeg",
+      "Double Cream",
+      "Jerusalem Artichokes",
+      "Leek",
+      "Prawns",
+      "Parsley",
+      "Dill",
+      "Lemon",
+      "Gruy\u00e8re",
+      "Lemon"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "Contains semi-skimmed milk, double cream, and Gruy\u00e8re cheese."
+      },
+      {
+        "allergen": "fish",
+        "confidence": 0.99,
+        "why": "Contains white fish fillets."
+      },
+      {
+        "allergen": "shellfish",
+        "confidence": 0.99,
+        "why": "Contains prawns."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.98,
+        "why": "Contains plain flour (typically wheat flour) in the sauce."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 840,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 63,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 30,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 81,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 12,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 7.5,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_13",
+    "restaurant_id": "rest_1",
+    "name": "Beef Dumpling Stew",
+    "description": "Hearty oven-braised beef stew with vegetables, red wine, and traditional suet dumplings.",
+    "price": 25.37,
+    "ingredients": [
+      "Olive Oil",
+      "Butter",
+      "Beef",
+      "Plain Flour",
+      "Garlic",
+      "Onions",
+      "Celery",
+      "Carrots",
+      "Leek",
+      "Swede",
+      "Red Wine",
+      "Beef Stock",
+      "Bay Leaf",
+      "Thyme",
+      "Parsley",
+      "Plain Flour",
+      "Baking Powder",
+      "Suet",
+      "Water"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "Contains butter in the stew base."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.99,
+        "why": "Contains plain flour in the stew and dumplings."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 800,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 44,
+        "confidence": 0.65
+      },
+      "fat": {
+        "value": 52,
+        "confidence": 0.65
+      },
+      "carbohydrates": {
+        "value": 50,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 8,
+        "confidence": 0.6
+      },
+      "fiber": {
+        "value": 5,
+        "confidence": 0.6
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_14",
+    "restaurant_id": "rest_1",
+    "name": "Corned Beef and Cabbage",
+    "description": "Classic boiled corned beef brisket simmered with cabbage, carrots, and potatoes.",
+    "price": 10.33,
+    "ingredients": [
+      "Beef Brisket",
+      "Small Potatoes",
+      "Carrots",
+      "Cabbage"
+    ],
+    "inferred_allergens": [],
+    "nutrition_facts": {
+      "calories": {
+        "value": 760,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 46,
+        "confidence": 0.65
+      },
+      "fat": {
+        "value": 44,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 45,
+        "confidence": 0.7
+      },
+      "sugar": {
+        "value": 7,
+        "confidence": 0.7
+      },
+      "fiber": {
+        "value": 8,
+        "confidence": 0.7
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_15",
+    "restaurant_id": "rest_1",
+    "name": "Chocolate Raspberry Brownies",
+    "description": "Fudgy chocolate brownies studded with raspberries, made with dark and milk chocolate, butter, eggs, and flour.",
+    "price": 12.52,
+    "ingredients": [
+      "Dark Chocolate",
+      "Milk Chocolate",
+      "Salted Butter",
+      "Light Brown Soft Sugar",
+      "Eggs",
+      "Plain Flour",
+      "Cocoa",
+      "Raspberries"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "Contains milk chocolate and butter (both are dairy)."
+      },
+      {
+        "allergen": "egg",
+        "confidence": 0.99,
+        "why": "Eggs are explicitly listed as an ingredient."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.98,
+        "why": "Plain flour is typically wheat flour and contains gluten."
+      },
+      {
+        "allergen": "soy",
+        "confidence": 0.45,
+        "why": "Many commercial chocolates include soy lecithin as an emulsifier, though not explicitly listed here."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 300,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 4,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 17,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 32,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 22,
+        "confidence": 0.6
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_16",
+    "restaurant_id": "rest_1",
+    "name": "Mustard champ",
+    "description": "Creamy Irish mashed potatoes with milk, butter, wholegrain mustard, and spring onions.",
+    "price": 11.24,
+    "ingredients": [
+      "Potatoes",
+      "Milk",
+      "Butter",
+      "Mustard",
+      "Spring Onions",
+      "Spring Onions"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "Contains milk and butter, which are dairy products explicitly listed in the ingredients and described in the method."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 421,
+        "confidence": 0.7
+      },
+      "protein": {
+        "value": 8.9,
+        "confidence": 0.7
+      },
+      "fat": {
+        "value": 14.9,
+        "confidence": 0.75
+      },
+      "carbohydrates": {
+        "value": 64.9,
+        "confidence": 0.7
+      },
+      "sugar": {
+        "value": 7.5,
+        "confidence": 0.6
+      },
+      "fiber": {
+        "value": 6.5,
+        "confidence": 0.6
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_17",
+    "restaurant_id": "rest_1",
+    "name": "Classic Cheeseburger",
+    "description": "Grilled beef patty topped with melted cheddar, lettuce, tomato, pickles, and burger sauce on a toasted brioche bun.",
+    "price": 11.50,
+    "ingredients": [
+      "Beef Patty",
+      "Cheddar Cheese",
+      "Brioche Bun",
+      "Lettuce",
+      "Tomato",
+      "Pickles",
+      "Burger Sauce",
+      "Salt",
+      "Pepper"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.99,
+        "why": "Brioche bun typically contains wheat flour (gluten)."
+      },
+      {
+        "allergen": "dairy",
+        "confidence": 0.98,
+        "why": "Cheddar cheese is a dairy product."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 780,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 36,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 48,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 45,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 7,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 2,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_18",
+    "restaurant_id": "rest_1",
+    "name": "Margherita Pizza",
+    "description": "Stone-baked pizza with San Marzano tomato sauce, fresh mozzarella, basil, and extra virgin olive oil.",
+    "price": 13.00,
+    "ingredients": [
+      "Pizza Dough",
+      "San Marzano Tomatoes",
+      "Fresh Mozzarella",
+      "Basil",
+      "Olive Oil",
+      "Salt"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "Fresh mozzarella is a dairy cheese."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.98,
+        "why": "Pizza dough is typically made from wheat flour (contains gluten)."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 820,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 28,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 36,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 86,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_19",
+    "restaurant_id": "rest_1",
+    "name": "Pepperoni Pizza",
+    "description": "Classic pepperoni pizza with tomato sauce, mozzarella and spicy pepperoni slices.",
+    "price": 14.50,
+    "ingredients": [
+      "Pizza Dough",
+      "Tomato Sauce",
+      "Mozzarella",
+      "Pepperoni",
+      "Olive Oil",
+      "Oregano"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.99,
+        "why": "Pizza dough contains wheat flour."
+      },
+      {
+        "allergen": "dairy",
+        "confidence": 0.98,
+        "why": "Mozzarella is dairy."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 980,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 40,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 56,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 78,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_20",
+    "restaurant_id": "rest_1",
+    "name": "BBQ Chicken Pizza",
+    "description": "Crispy crust pizza topped with BBQ sauce, grilled chicken, red onion, cilantro and mozzarella.",
+    "price": 15.75,
+    "ingredients": [
+      "Pizza Dough",
+      "BBQ Sauce",
+      "Grilled Chicken",
+      "Red Onion",
+      "Mozzarella",
+      "Cilantro"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.99,
+        "why": "Pizza dough contains wheat."
+      },
+      {
+        "allergen": "dairy",
+        "confidence": 0.95,
+        "why": "Mozzarella is dairy."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 900,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 42,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 34,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 92,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 18,
+        "confidence": 0.55
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_21",
+    "restaurant_id": "rest_1",
+    "name": "Spaghetti Carbonara",
+    "description": "Traditional Roman pasta with eggs, Pecorino Romano, guanciale (cured pork cheek), and black pepper.",
+    "price": 13.95,
+    "ingredients": [
+      "Spaghetti",
+      "Eggs",
+      "Pecorino Romano",
+      "Guanciale",
+      "Black Pepper",
+      "Salt"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "egg",
+        "confidence": 0.99,
+        "why": "Eggs are core to carbonara sauce."
+      },
+      {
+        "allergen": "dairy",
+        "confidence": 0.98,
+        "why": "Pecorino Romano is a cheese (dairy)."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.98,
+        "why": "Spaghetti is made from wheat (contains gluten)."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 820,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 28,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 46,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 78,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 3,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_22",
+    "restaurant_id": "rest_1",
+    "name": "Penne Arrabbiata",
+    "description": "Penne pasta tossed in a spicy garlic and tomato sauce, finished with parsley and olive oil.",
+    "price": 11.25,
+    "ingredients": [
+      "Penne",
+      "Tomato Sauce",
+      "Garlic",
+      "Red Chilli",
+      "Olive Oil",
+      "Parsley",
+      "Salt"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.98,
+        "why": "Penne pasta typically contains wheat."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 620,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 16,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 18,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 90,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 9,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 6,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_23",
+    "restaurant_id": "rest_1",
+    "name": "Lasagna Bolognese",
+    "description": "Layered pasta with slow-cooked beef rag\u00f9, béchamel sauce and parmesan, baked until golden.",
+    "price": 16.95,
+    "ingredients": [
+      "Lasagna Sheets",
+      "Beef Rag\u00f9",
+      "B\u00e9chamel",
+      "Parmesan",
+      "Tomato",
+      "Onion",
+      "Garlic",
+      "Olive Oil"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "B\u00e9chamel and parmesan contain milk/dairy."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.99,
+        "why": "Lasagna sheets typically contain wheat flour."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 920,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 44,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 52,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 68,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 9,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 5,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_24",
+    "restaurant_id": "rest_1",
+    "name": "Chicken Alfredo",
+    "description": "Fettuccine tossed in a creamy parmesan alfredo sauce with grilled chicken and parsley.",
+    "price": 14.75,
+    "ingredients": [
+      "Fettuccine",
+      "Parmesan",
+      "Butter",
+      "Double Cream",
+      "Grilled Chicken",
+      "Garlic",
+      "Parsley"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "Parmesan, butter and cream are dairy products."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.98,
+        "why": "Fettuccine is made from wheat."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 980,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 42,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 60,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 72,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 4,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_25",
+    "restaurant_id": "rest_1",
+    "name": "Mushroom Risotto",
+    "description": "Creamy arborio rice risotto with mixed mushrooms, white wine, parmesan and thyme.",
+    "price": 12.80,
+    "ingredients": [
+      "Arborio Rice",
+      "Mixed Mushrooms",
+      "White Wine",
+      "Onion",
+      "Garlic",
+      "Parmesan",
+      "Butter",
+      "Vegetable Stock",
+      "Thyme"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.98,
+        "why": "Parmesan and butter are used in the risotto."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 640,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 14,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 26,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 82,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 4,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 5,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_26",
+    "restaurant_id": "rest_1",
+    "name": "Vegetable Biryani",
+    "description": "Fragrant basmati rice layered with spiced seasonal vegetables, saffron, fried onions and mint.",
+    "price": 10.50,
+    "ingredients": [
+      "Basmati Rice",
+      "Carrots",
+      "Peas",
+      "Potatoes",
+      "Onion",
+      "Tomato",
+      "Saffron",
+      "Mint",
+      "Biryani Spices",
+      "Yogurt"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.85,
+        "why": "Yogurt is listed; may contain dairy."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 560,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 10,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 18,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 86,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 6,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_27",
+    "restaurant_id": "rest_1",
+    "name": "Chicken Biryani",
+    "description": "Slow-cooked spiced chicken layered with aromatic basmati rice, saffron and caramelized onions.",
+    "price": 13.99,
+    "ingredients": [
+      "Basmati Rice",
+      "Chicken",
+      "Yogurt",
+      "Onions",
+      "Garlic",
+      "Ginger",
+      "Biryani Spice Mix",
+      "Saffron",
+      "Mint",
+      "Ghee"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.9,
+        "why": "Yogurt and ghee (clarified butter) are used."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 820,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 36,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 34,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 88,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_28",
+    "restaurant_id": "rest_1",
+    "name": "Lamb Biryani",
+    "description": "Rich slow-cooked lamb with basmati rice, whole spices, fried onions and saffron-infused layers.",
+    "price": 15.99,
+    "ingredients": [
+      "Basmati Rice",
+      "Lamb",
+      "Onion",
+      "Garlic",
+      "Ginger",
+      "Whole Spices",
+      "Saffron",
+      "Yogurt",
+      "Ghee",
+      "Coriander"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.9,
+        "why": "Yogurt and ghee are listed as ingredients."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 920,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 38,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 48,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 82,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 5,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_29",
+    "restaurant_id": "rest_1",
+    "name": "Paneer Tikka",
+    "description": "Chargrilled cubes of paneer marinated in spiced yogurt served with lemon and onion salad.",
+    "price": 9.50,
+    "ingredients": [
+      "Paneer",
+      "Greek Yogurt",
+      "Garam Masala",
+      "Turmeric",
+      "Red Chilli",
+      "Lemon Juice",
+      "Onion",
+      "Bell Pepper"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "Paneer (cheese) and yogurt are dairy products."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 480,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 22,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 32,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 14,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 2,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_30",
+    "restaurant_id": "rest_1",
+    "name": "Butter Chicken",
+    "description": "Creamy tomato-based curry with tandoori-style chicken finished with butter and cream.",
+    "price": 13.50,
+    "ingredients": [
+      "Chicken",
+      "Tomato Puree",
+      "Butter",
+      "Double Cream",
+      "Garam Masala",
+      "Garlic",
+      "Ginger",
+      "Kasuri Methi"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "Contains butter and double cream (dairy)."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 780,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 34,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 48,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 42,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 8,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_31",
+    "restaurant_id": "rest_1",
+    "name": "Tandoori Chicken",
+    "description": "Chicken marinated in yogurt and tandoori spices, charcoal-grilled for a smoky finish.",
+    "price": 12.00,
+    "ingredients": [
+      "Chicken",
+      "Yogurt",
+      "Tandoori Masala",
+      "Lemon Juice",
+      "Garlic",
+      "Ginger",
+      "Oil"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.95,
+        "why": "Yogurt in the marinade indicates dairy."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 520,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 42,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 28,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 6,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 3,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 1,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_32",
+    "restaurant_id": "rest_1",
+    "name": "Fish & Chips",
+    "description": "Beer-battered cod served with chunky fries, mushy peas and tartare sauce.",
+    "price": 11.95,
+    "ingredients": [
+      "Cod",
+      "Beer Batter (Flour)",
+      "Potatoes",
+      "Mushy Peas",
+      "Tartare Sauce",
+      "Salt",
+      "Vinegar"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "fish",
+        "confidence": 0.99,
+        "why": "Contains cod (fish)."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.98,
+        "why": "Beer batter contains wheat flour."
+      },
+      {
+        "allergen": "egg",
+        "confidence": 0.6,
+        "why": "Tartare sauce may contain egg (mayonnaise base)."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 990,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 42,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 48,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 94,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 6,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_33",
+    "restaurant_id": "rest_1",
+    "name": "Caesar Salad",
+    "description": "Crisp romaine lettuce tossed with Caesar dressing, shaved parmesan, croutons and anchovy.",
+    "price": 9.75,
+    "ingredients": [
+      "Romaine Lettuce",
+      "Caesar Dressing",
+      "Parmesan",
+      "Croutons",
+      "Anchovy",
+      "Lemon",
+      "Black Pepper"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "fish",
+        "confidence": 0.9,
+        "why": "Anchovy is listed as an ingredient in the dressing."
+      },
+      {
+        "allergen": "dairy",
+        "confidence": 0.98,
+        "why": "Parmesan cheese is included."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.85,
+        "why": "Croutons typically contain wheat."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 420,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 12,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 34,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 18,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 3,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_34",
+    "restaurant_id": "rest_1",
+    "name": "Greek Salad",
+    "description": "Tomato, cucumber, red onion, Kalamata olives and feta tossed in oregano and olive oil.",
+    "price": 8.50,
+    "ingredients": [
+      "Tomato",
+      "Cucumber",
+      "Red Onion",
+      "Kalamata Olives",
+      "Feta",
+      "Olive Oil",
+      "Oregano"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.98,
+        "why": "Feta cheese (dairy) is present."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 340,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 8,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 28,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 12,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_35",
+    "restaurant_id": "rest_1",
+    "name": "Avocado Toast",
+    "description": "Smashed avocado on toasted sourdough, topped with lemon, chili flakes and microgreens.",
+    "price": 7.95,
+    "ingredients": [
+      "Sourdough Bread",
+      "Avocado",
+      "Lemon",
+      "Chili Flakes",
+      "Microgreens",
+      "Olive Oil",
+      "Salt"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.98,
+        "why": "Sourdough bread is made from wheat flour (contains gluten)."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 420,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 7,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 28,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 34,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 2,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 10,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_36",
+    "restaurant_id": "rest_1",
+    "name": "Club Sandwich",
+    "description": "Triple-layer sandwich with roasted turkey, bacon, lettuce, tomato and mayonnaise on toasted bread.",
+    "price": 10.25,
+    "ingredients": [
+      "Toasted Bread",
+      "Roasted Turkey",
+      "Bacon",
+      "Lettuce",
+      "Tomato",
+      "Mayonnaise",
+      "Salt",
+      "Pepper"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.99,
+        "why": "Toasted bread contains wheat flour."
+      },
+      {
+        "allergen": "egg",
+        "confidence": 0.85,
+        "why": "Mayonnaise often contains egg unless specified egg-free."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 720,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 36,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 36,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 62,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_37",
+    "restaurant_id": "rest_1",
+    "name": "Falafel Wrap",
+    "description": "Crispy falafel balls, hummus, pickles, tomato and lettuce wrapped in flatbread with tahini drizzle.",
+    "price": 8.50,
+    "ingredients": [
+      "Falafel (Chickpeas)",
+      "Flatbread",
+      "Hummus",
+      "Pickles",
+      "Tomato",
+      "Lettuce",
+      "Tahini"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "sesame",
+        "confidence": 0.95,
+        "why": "Tahini is made from sesame seeds."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.9,
+        "why": "Flatbread typically contains wheat flour."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 650,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 18,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 28,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 76,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 10,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_38",
+    "restaurant_id": "rest_1",
+    "name": "Beef Burger (Double Patty)",
+    "description": "Double grilled beef patties with cheddar, caramelized onion, lettuce and smoky mayo on sesame bun.",
+    "price": 14.99,
+    "ingredients": [
+      "Beef Patties",
+      "Cheddar",
+      "Sesame Bun",
+      "Caramelized Onion",
+      "Lettuce",
+      "Smoky Mayo",
+      "Salt",
+      "Pepper"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.99,
+        "why": "Sesame bun contains wheat (gluten)."
+      },
+      {
+        "allergen": "dairy",
+        "confidence": 0.98,
+        "why": "Cheddar cheese is dairy."
+      },
+      {
+        "allergen": "sesame",
+        "confidence": 0.85,
+        "why": "Sesame seeds on the bun indicate possible sesame allergen."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 1100,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 60,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 70,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 72,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 9,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_39",
+    "restaurant_id": "rest_1",
+    "name": "Veggie Burger",
+    "description": "Grilled vegetable and bean patty with lettuce, tomato, avocado and vegan mayo on wholegrain bun.",
+    "price": 10.95,
+    "ingredients": [
+      "Veg Patty (Beans & Veg)",
+      "Wholegrain Bun",
+      "Lettuce",
+      "Tomato",
+      "Avocado",
+      "Vegan Mayo",
+      "Salt",
+      "Pepper"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.95,
+        "why": "Wholegrain bun contains wheat flour (gluten)."
+      },
+      {
+        "allergen": "soy",
+        "confidence": 0.5,
+        "why": "Some veg patties or vegan mayo may include soy products."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 620,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 18,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 28,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 72,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 8,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_40",
+    "restaurant_id": "rest_1",
+    "name": "Chicken Nuggets (8 pcs)",
+    "description": "Crispy breaded chicken nuggets served with ketchup or BBQ dipping sauce.",
+    "price": 6.25,
+    "ingredients": [
+      "Chicken",
+      "Breadcrumbs",
+      "Flour",
+      "Egg",
+      "Salt",
+      "Pepper",
+      "Vegetable Oil"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "egg",
+        "confidence": 0.98,
+        "why": "Egg is used in the breading/dredging process."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.99,
+        "why": "Breadcrumbs and flour contain wheat (gluten)."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 520,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 24,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 30,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 28,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 2,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 1,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_41",
+    "restaurant_id": "rest_1",
+    "name": "Onion Rings",
+    "description": "Crispy beer-battered onion rings fried until golden, served with dipping sauce.",
+    "price": 4.75,
+    "ingredients": [
+      "Onion",
+      "Beer Batter (Flour)",
+      "Vegetable Oil",
+      "Salt",
+      "Pepper",
+      "Dipping Sauce"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.98,
+        "why": "Beer batter contains wheat flour."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 450,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 4,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 26,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 48,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 2,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_42",
+    "restaurant_id": "rest_1",
+    "name": "Mozzarella Sticks",
+    "description": "Breaded and fried mozzarella sticks served with marinara dipping sauce.",
+    "price": 5.95,
+    "ingredients": [
+      "Mozzarella",
+      "Breadcrumbs",
+      "Flour",
+      "Egg",
+      "Vegetable Oil",
+      "Marinara Sauce"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "Mozzarella cheese is dairy."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.99,
+        "why": "Breadcrumbs and flour contain wheat (gluten)."
+      },
+      {
+        "allergen": "egg",
+        "confidence": 0.9,
+        "why": "Egg is used to bind the breading."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 560,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 20,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 36,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 36,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 1,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_43",
+    "restaurant_id": "rest_1",
+    "name": "BBQ Ribs",
+    "description": "Slow-roasted pork ribs glazed with smoky BBQ sauce, served with coleslaw and fries.",
+    "price": 18.50,
+    "ingredients": [
+      "Pork Ribs",
+      "BBQ Sauce",
+      "Coleslaw",
+      "Potatoes",
+      "Salt",
+      "Pepper"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "soy",
+        "confidence": 0.6,
+        "why": "Some BBQ sauces may contain soy ingredients."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.4,
+        "why": "Certain sauces may contain wheat-based thickeners, depending on recipe."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 1150,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 68,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 78,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 62,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 26,
+        "confidence": 0.55
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_44",
+    "restaurant_id": "rest_1",
+    "name": "Steak Frites",
+    "description": "Pan-seared sirloin steak served with garlic butter and shoestring fries.",
+    "price": 21.00,
+    "ingredients": [
+      "Sirloin Steak",
+      "Garlic Butter",
+      "Potatoes",
+      "Salt",
+      "Pepper",
+      "Parsley"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.9,
+        "why": "Garlic butter contains dairy."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 980,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 62,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 64,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 56,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 2,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_45",
+    "restaurant_id": "rest_1",
+    "name": "Shrimp Scampi",
+    "description": "Sautéed shrimp in garlic, lemon, white wine and butter sauce served over linguine.",
+    "price": 16.25,
+    "ingredients": [
+      "Shrimp",
+      "Linguine",
+      "Garlic",
+      "Butter",
+      "White Wine",
+      "Lemon",
+      "Parsley"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "shellfish",
+        "confidence": 0.99,
+        "why": "Contains shrimp (shellfish)."
+      },
+      {
+        "allergen": "dairy",
+        "confidence": 0.9,
+        "why": "Butter is used in the sauce."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.95,
+        "why": "Linguine contains wheat (gluten)."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 720,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 34,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 32,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 72,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 3,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_46",
+    "restaurant_id": "rest_1",
+    "name": "Pad Thai",
+    "description": "Stir-fried rice noodles with shrimp, tofu, egg, bean sprouts, peanuts and tamarind sauce.",
+    "price": 12.99,
+    "ingredients": [
+      "Rice Noodles",
+      "Shrimp",
+      "Tofu",
+      "Egg",
+      "Bean Sprouts",
+      "Peanuts",
+      "Tamarind Sauce",
+      "Garlic",
+      "Chives"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "shellfish",
+        "confidence": 0.95,
+        "why": "Contains shrimp."
+      },
+      {
+        "allergen": "peanuts",
+        "confidence": 0.99,
+        "why": "Peanuts are explicitly listed."
+      },
+      {
+        "allergen": "egg",
+        "confidence": 0.95,
+        "why": "Egg is used in the dish."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 700,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 28,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 28,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 86,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 14,
+        "confidence": 0.55
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_47",
+    "restaurant_id": "rest_1",
+    "name": "Green Curry (Thai)",
+    "description": "Aromatic Thai green curry with coconut milk, chicken, eggplant, basil and lime leaves served with jasmine rice.",
+    "price": 13.50,
+    "ingredients": [
+      "Chicken",
+      "Green Curry Paste",
+      "Coconut Milk",
+      "Eggplant",
+      "Thai Basil",
+      "Lime Leaves",
+      "Jasmine Rice"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.2,
+        "why": "No dairy usually, but coconut milk is plant-based (not a dairy allergen)."
+      },
+      {
+        "allergen": "fish",
+        "confidence": 0.6,
+        "why": "Some green curry pastes may contain fish sauce or shrimp paste."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 760,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 30,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 44,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 62,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 4,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_48",
+    "restaurant_id": "rest_1",
+    "name": "Tonkotsu Ramen Bowl",
+    "description": "Rich pork bone broth ramen with chashu pork, soft-boiled egg, scallions and kikurage mushrooms.",
+    "price": 13.25,
+    "ingredients": [
+      "Tonkotsu Broth",
+      "Ramen Noodles",
+      "Chashu Pork",
+      "Soft-Boiled Egg",
+      "Scallions",
+      "Kikurage Mushrooms",
+      "Nori"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "egg",
+        "confidence": 0.99,
+        "why": "Contains soft-boiled egg."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.98,
+        "why": "Ramen noodles typically contain wheat."
+      },
+      {
+        "allergen": "soy",
+        "confidence": 0.8,
+        "why": "Broth and tare may contain soy sauce."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 820,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 36,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 48,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 72,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 4,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_49",
+    "restaurant_id": "rest_1",
+    "name": "Sushi Platter (Assorted)",
+    "description": "Assorted nigiri and maki selection featuring tuna, salmon, prawn and vegetable rolls with soy and wasabi.",
+    "price": 19.95,
+    "ingredients": [
+      "Sushi Rice",
+      "Nori",
+      "Tuna",
+      "Salmon",
+      "Prawn",
+      "Cucumber",
+      "Avocado",
+      "Soy Sauce",
+      "Wasabi",
+      "Pickled Ginger"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "fish",
+        "confidence": 0.99,
+        "why": "Contains tuna and salmon (fish)."
+      },
+      {
+        "allergen": "shellfish",
+        "confidence": 0.95,
+        "why": "Contains prawn (shellfish)."
+      },
+      {
+        "allergen": "soy",
+        "confidence": 0.95,
+        "why": "Soy sauce is commonly served and contains soy."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 560,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 34,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 12,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 72,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 6,
+        "confidence": 0.5
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  },
+  {
+    "_id": "dish_50",
+    "restaurant_id": "rest_1",
+    "name": "Chocolate Lava Cake",
+    "description": "Warm chocolate cake with a gooey molten center, served with vanilla ice cream and raspberry coulis.",
+    "price": 7.95,
+    "ingredients": [
+      "Dark Chocolate",
+      "Butter",
+      "Eggs",
+      "Sugar",
+      "Plain Flour",
+      "Vanilla Ice Cream",
+      "Raspberry Coulis"
+    ],
+    "inferred_allergens": [
+      {
+        "allergen": "dairy",
+        "confidence": 0.99,
+        "why": "Butter and ice cream contain dairy."
+      },
+      {
+        "allergen": "egg",
+        "confidence": 0.99,
+        "why": "Eggs are used in the cake batter."
+      },
+      {
+        "allergen": "wheat_gluten",
+        "confidence": 0.98,
+        "why": "Plain flour contains wheat (gluten)."
+      }
+    ],
+    "nutrition_facts": {
+      "calories": {
+        "value": 610,
+        "confidence": 0.6
+      },
+      "protein": {
+        "value": 8,
+        "confidence": 0.6
+      },
+      "fat": {
+        "value": 36,
+        "confidence": 0.6
+      },
+      "carbohydrates": {
+        "value": 68,
+        "confidence": 0.6
+      },
+      "sugar": {
+        "value": 42,
+        "confidence": 0.55
+      },
+      "fiber": {
+        "value": 3,
+        "confidence": 0.5
+      }
+    },
+    "availaibility": true,
+    "serving_size": "single",
+    "explicit_allergens": []
+  }
+]

@@ -30,6 +30,7 @@ class DishData(BaseModel):
     Attributes:
         dish_id (str): Unique identifier for the dish.
         dish_name (str): Human-readable name of the dish.
+        restaurant_id (Optional[str]): ID of the restaurant this dish belongs to.
         description (Optional[str]): Short textual description of the dish.
         price (Optional[Any]): Price value, which may vary in type (string, float, or object).
         ingredients (List[str]): List of primary ingredients used in the dish.
@@ -41,6 +42,7 @@ class DishData(BaseModel):
     """
     dish_id: str
     dish_name : str = Field(default="N/A")
+    restaurant_id : Optional[str] = None
     description : Optional[str] = None
     price : Optional[Any] = None
     ingredients : List[str] = None

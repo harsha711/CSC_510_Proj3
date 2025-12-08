@@ -69,14 +69,24 @@ class RestaurantUpdate(BaseModel):
     cuisine:Optional[List[str]] = None
     rating:Optional[float] = None
 
-class RestaurantInDB(RestaurantBase):
+class RestaurantInDB(BaseModel):
     """
     Represents a restaurant record stored in the database.
 
     Attributes:
         id (str): The unique identifier for the restaurant (aliased as `_id` in the database).
+        name (str): The name of the restaurant.
+        location (Optional[str]): The geographical location of the restaurant (aliased from address).
+        address (Optional[str]): The address of the restaurant (alternative to location).
+        cuisine (Optional[List[str]]): A list of cuisines the restaurant serves.
+        rating (Optional[float]): The restaurant's rating between 0 and 5.
     """
-    id:str = Field(alias="_id")
+    id: str = Field(alias="_id")
+    name: str
+    location: Optional[str] = Field(default=None, alias="address")
+    address: Optional[str] = None
+    cuisine: Optional[List[str]] = None
+    rating: Optional[float] = Field(default=0.0, ge=0, le=5.0)
 
     class Config:
         populate_by_name = True
