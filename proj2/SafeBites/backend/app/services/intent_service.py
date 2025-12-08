@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-llm = ChatOpenAI(model="gpt-4o-mini",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"),callbacks=[LLMUsageTracker()])
+llm = ChatOpenAI(model="gpt-4o-mini",temperature=0,openai_api_key=os.getenv("OPENAI_KEY"),callbacks=[LLMUsageTracker()])
 
 def extract_query_intent(state):
     """
@@ -59,9 +59,10 @@ def extract_query_intent(state):
                   - User preference queries are about the USER, not about dishes
 
                   ⚡ Important rules:
-                  - Each query part must be **self-contained**: if a query depends on previous results, include that dependency explicitly.  
-                  - Preserve **order of dependency**: queries that must be processed sequentially should include phrases like “from the dishes above” or “from the previous results”.  
-                  - Split all queries clearly and avoid ambiguity.  
+                  - Each query part must be **self-contained**: if a query depends on previous results, include that dependency explicitly.
+                  - Preserve **order of dependency**: queries that must be processed sequentially should include phrases like "from the dishes above" or "from the previous results".
+                  - Split all queries clearly and avoid ambiguity.
+                  - **Price interpretation**: If a user mentions a price without "under", "over", or "around" (e.g., "dishes 20 dollars", "dishes $15"), interpret it as "under [price]" by default.
                   - Respond only in valid JSON, nothing else.
 
                   ---
@@ -135,6 +136,22 @@ def extract_query_intent(state):
                     "user_preferences": [
                       "What am I allergic to?"
                     ],
+                    "irrelevant": []
+                  }}
+
+                  ---
+
+                  Example 5:
+
+                  User Query: "show me all dishes 20 dollars"
+
+                  Output:
+                  {{
+                    "menu_search": [
+                      "List all dishes under $20"
+                    ],
+                    "dish_info": [],
+                    "user_preferences": [],
                     "irrelevant": []
                   }}
 

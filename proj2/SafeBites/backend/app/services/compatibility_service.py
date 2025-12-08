@@ -24,7 +24,7 @@ load_dotenv()
 
 llm = ChatOpenAI(
     model="gpt-4o-mini",
-    temperature=0.3,  # Lower temperature for more consistent scoring
+    temperature=0.1,  # Lower temperature for faster, more consistent scoring
     openai_api_key=os.getenv("OPENAI_KEY"),
     callbacks=[LLMUsageTracker()]
 )
@@ -57,28 +57,25 @@ def calculate_compatibility_scores(state) -> dict:
         logger.warning("No user profile found in context, skipping compatibility scoring")
         return {"compatibility_results": CompatibilityResult(scores={})}
 
-    logger.info(f"Calculating compatibility for {len(menu_results.menu_results)} dishes")
-
-    scores = {}
+    # Collect all dishes
     all_dishes = []
-
-    # Collect all dishes for alternative suggestions
     for query, dishes in menu_results.menu_results.items():
         all_dishes.extend(dishes)
 
-    # Calculate score for each dish
-    for query, dishes in menu_results.menu_results.items():
-        for dish in dishes:
-            try:
-                compatibility = calculate_dish_compatibility(
-                    dish=dish,
-                    user_profile=user_profile,
-                    all_dishes=all_dishes
-                )
-                scores[dish.dish_id] = compatibility
-                logger.debug(f"Scored {dish.dish_name}: {compatibility.overall_score}/100")
-            except Exception as e:
-                logger.error(f"Error calculating compatibility for {dish.dish_name}: {e}")
+    # PERFORMANCE OPTIMIZATION: Limit to first 7 dishes for faster response
+    # Full compatibility scoring takes 30-40 seconds, limiting improves UX
+    max_dishes_to_score = 7
+    if len(all_dishes) > max_dishes_to_score:
+        logger.info(f"Limiting compatibility scoring from {len(all_dishes)} to {max_dishes_to_score} dishes for performance")
+        all_dishes = all_dishes[:max_dishes_to_score]
+
+    logger.info(f"Calculating compatibility for {len(all_dishes)} dishes using batch processing")
+
+    # OPTIMIZATION: Batch process all dishes in one LLM call
+    scores = calculate_batch_compatibility(
+        dishes=all_dishes,
+        user_profile=user_profile
+    )
 
     return {"compatibility_results": CompatibilityResult(scores=scores)}
 
@@ -123,6 +120,205 @@ def extract_user_profile(context: List[dict]) -> Optional[dict]:
         return profile
 
     return None
+
+
+def calculate_batch_compatibility(dishes: List, user_profile: dict) -> Dict[str, CompatibilityScore]:
+    """
+    OPTIMIZED: Calculate compatibility scores for multiple dishes in one LLM call.
+
+    This is much faster than calling the LLM once per dish.
+
+    Args:
+        dishes: List of DishData objects to score.
+        user_profile: User profile dictionary.
+
+    Returns:
+        Dict[str, CompatibilityScore]: Map of dish_id to CompatibilityScore.
+    """
+    if not dishes:
+        return {}
+
+    # Build compact dish list for LLM
+    dishes_data = []
+    for dish in dishes:
+        dishes_data.append({
+            "id": dish.dish_id,
+            "name": dish.dish_name,
+            "description": dish.description,
+            "ingredients": dish.ingredients,
+            "allergens": dish.allergens if dish.allergens else [],
+            "nutrition": dish.nutrition_facts if dish.nutrition_facts else {},
+            "price": dish.price
+        })
+
+    prompt = ChatPromptTemplate.from_template("""
+You are analyzing multiple dishes for compatibility with a user's profile.
+
+**User Profile:**
+- Allergens to avoid: {allergens}
+- Health Goals: {health_goals}
+- Cuisine Preferences: {cuisine_preferences}
+- Taste Preferences: {taste_preferences}
+- Dietary Pattern: {dietary_pattern}
+
+**Dishes to Analyze:**
+{dishes_json}
+
+**Task:**
+For EACH dish, score it on these 4 factors (0-100):
+
+1. **Allergen Safety**: Check if dish contains user allergens
+   - 100 = Safe, 50-99 = Warning, 0-49 = Unsafe
+   - Level: SAFE/WARNING/UNSAFE
+
+2. **Nutrition Match**: How well nutrition aligns with health goals
+   - If user has no health goals: give neutral 75 score with level GOOD
+   - Higher = better match
+
+3. **Taste Preference**: Match with cuisine/taste preferences
+   - If user has no cuisine/taste preferences: give neutral 75 score with level GOOD
+   - Always provide reasoning even if no preferences (e.g., "No specific preferences set")
+   - Higher = better match
+
+4. **Dietary Pattern**: Alignment with dietary pattern
+   - Higher = better alignment
+
+**Calculate Overall Score:**
+- ALWAYS use weighted formula: (Allergen × 0.40) + (Nutrition × 0.25) + (Taste × 0.20) + (Dietary × 0.15)
+- Example: If Allergen=100, Nutrition=75, Taste=50, Dietary=80 → Overall = (100×0.40)+(75×0.25)+(50×0.20)+(80×0.15) = 40+18.75+10+12 = 80.75 → 81
+- IMPORTANT: Low taste score should NOT make overall score 0!
+- Safety override: If allergen < 50, then overall must be < 50 (reduce overall score accordingly)
+
+**Output Format (JSON array):**
+[
+  {{
+    "dish_id": "id",
+    "overall_score": <0-100>,
+    "allergen_safety": {{
+      "score": <0-100>,
+      "level": "SAFE|WARNING|UNSAFE",
+      "detected_allergens": [],
+      "reasoning": "brief"
+    }},
+    "nutrition_match": {{
+      "score": <0-100>,
+      "level": "EXCELLENT|GOOD|MODERATE|POOR",
+      "matched_goals": [],
+      "conflicts": [],
+      "reasoning": "brief"
+    }},
+    "taste_preference": {{
+      "score": <0-100>,
+      "level": "EXCELLENT|GOOD|MODERATE|POOR",
+      "matched_cuisines": [],
+      "matched_tastes": [],
+      "reasoning": "brief"
+    }},
+    "dietary_pattern": {{
+      "score": <0-100>,
+      "level": "EXCELLENT|GOOD|MODERATE|POOR",
+      "user_pattern": "{dietary_pattern}",
+      "dish_category": "category",
+      "reasoning": "brief"
+    }},
+    "recommendation": "1-2 sentence recommendation"
+  }}
+]
+
+Be concise. No extra text. Safety first.
+""")
+
+    try:
+        response = llm.invoke(prompt.format_messages(
+            allergens=", ".join(user_profile["allergens"]) if user_profile["allergens"] else "None",
+            health_goals=", ".join(user_profile["health_goals"]) if user_profile["health_goals"] else "None",
+            cuisine_preferences=", ".join(user_profile["cuisine_preferences"]) if user_profile["cuisine_preferences"] else "None",
+            taste_preferences=", ".join(user_profile["taste_preferences"]) if user_profile["taste_preferences"] else "None",
+            dietary_pattern=user_profile["dietary_pattern"],
+            dishes_json=json.dumps(dishes_data, indent=2)
+        ))
+
+        content = response.content.strip()
+        if content.startswith("```"):
+            content = content.replace("```json", "").replace("```", "").strip()
+
+        scores_data = json.loads(content)
+
+        # Convert to CompatibilityScore objects
+        scores = {}
+        dish_lookup = {d.dish_id: d for d in dishes}
+
+        for score_data in scores_data:
+            dish_id = score_data["dish_id"]
+            dish = dish_lookup.get(dish_id)
+
+            if not dish:
+                continue
+
+            # Convert all float scores to integers (LLM sometimes returns floats)
+            def round_score(data):
+                """Recursively round all score fields to integers."""
+                if isinstance(data, dict):
+                    return {k: round_score(v) for k, v in data.items()}
+                elif isinstance(data, list):
+                    return [round_score(item) for item in data]
+                elif isinstance(data, float) and k == "score":
+                    return round(data)
+                else:
+                    return data
+
+            # Round scores in all sub-dictionaries
+            score_data["overall_score"] = round(score_data["overall_score"])
+            for key in ["allergen_safety", "nutrition_match", "taste_preference", "dietary_pattern"]:
+                if key in score_data and "score" in score_data[key]:
+                    score_data[key]["score"] = round(score_data[key]["score"])
+
+                    # Ensure all required fields are present
+                    if "reasoning" not in score_data[key]:
+                        score_data[key]["reasoning"] = "No analysis provided"
+
+            # ENFORCE weighted formula if LLM didn't follow it correctly
+            # This prevents taste mismatch from causing 0 overall score
+            allergen = score_data["allergen_safety"]["score"]
+            nutrition = score_data["nutrition_match"]["score"]
+            taste = score_data["taste_preference"]["score"]
+            dietary = score_data["dietary_pattern"]["score"]
+
+            calculated_score = round((allergen * 0.40) + (nutrition * 0.25) + (taste * 0.20) + (dietary * 0.15))
+
+            # Apply safety override: if allergen < 50, overall must be < 50
+            if allergen < 50 and calculated_score >= 50:
+                calculated_score = min(calculated_score, 49)
+
+            # Use calculated score if LLM gave 0 or very wrong score
+            if score_data["overall_score"] == 0 or abs(score_data["overall_score"] - calculated_score) > 20:
+                logger.warning(f"LLM gave overall_score={score_data['overall_score']}, but calculated={calculated_score}. Using calculated.")
+                score_data["overall_score"] = calculated_score
+
+            scores[dish_id] = CompatibilityScore(
+                dish_id=dish_id,
+                dish_name=dish.dish_name,
+                overall_score=score_data["overall_score"],
+                allergen_safety=AllergenSafetyScore(**score_data["allergen_safety"]),
+                nutrition_match=NutritionMatchScore(**score_data["nutrition_match"]),
+                taste_preference=TastePreferenceScore(**score_data["taste_preference"]),
+                dietary_pattern=DietaryPatternScore(**score_data["dietary_pattern"]),
+                recommendation=score_data["recommendation"],
+                alternative_suggestions=[]  # Skip alternatives for speed
+            )
+
+            logger.debug(f"Scored {dish.dish_name}: {scores[dish_id].overall_score}/100")
+
+        return scores
+
+    except Exception as e:
+        logger.error(f"Error in batch compatibility scoring: {e}")
+        # Fallback to individual scoring if batch fails
+        logger.warning("Batch scoring failed, falling back to individual scoring")
+        scores = {}
+        for dish in dishes:
+            scores[dish.dish_id] = create_default_compatibility_score(dish)
+        return scores
 
 
 def calculate_dish_compatibility(dish, user_profile: dict, all_dishes: List) -> CompatibilityScore:

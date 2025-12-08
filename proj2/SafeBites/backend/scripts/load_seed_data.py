@@ -19,8 +19,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Load environment variables
-base_dir = os.path.dirname(os.path.abspath(__file__))
-env_path = os.path.join(base_dir, '.env')
+# Since this script is in scripts/, go up one level to backend/
+script_dir = os.path.dirname(os.path.abspath(__file__))
+backend_dir = os.path.dirname(script_dir)
+env_path = os.path.join(backend_dir, '.env')
 load_dotenv(env_path)
 
 # MongoDB connection
@@ -29,6 +31,7 @@ DB_NAME = os.environ.get("DB_NAME", "foodapp")
 
 if not MONGO_URI:
     logger.error("MONGO_URI not found in environment variables!")
+    logger.error(f"Looked for .env at: {env_path}")
     sys.exit(1)
 
 def load_json_file(filepath):
@@ -80,9 +83,9 @@ def main():
         logger.error(f"✗ Failed to connect to MongoDB: {e}")
         sys.exit(1)
 
-    # Define file paths
-    seed_data_dir = os.path.join(base_dir, 'seed_data')
-    safebites_data_dir = os.path.join(base_dir, 'data', 'SafeBites_data')
+    # Define file paths (relative to backend/ directory)
+    seed_data_dir = os.path.join(backend_dir, 'seed_data')
+    safebites_data_dir = os.path.join(backend_dir, 'data', 'SafeBites_data')
 
     # Ask user which data source to use
     print("\nWhich data source would you like to load?")
@@ -108,7 +111,7 @@ def main():
         data_dir = seed_data_dir
         restaurants_file = os.path.join(data_dir, 'restaurants.json')
         dishes_file = os.path.join(data_dir, 'dishes.json')
-        dishes_refined_file = os.path.join(data_dir, 'dishes_refined.json')
+        dishes_refined_file = os.path.join(data_dir, 'dishes_refined_v2.json')
 
         # Check if files exist
         if not os.path.exists(restaurants_file):

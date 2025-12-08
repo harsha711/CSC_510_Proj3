@@ -588,10 +588,22 @@
   border-bottom: 2px solid #d1d5db;
 }
 
+.compatibility-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .compatibility-title {
   font-weight: 600;
   font-size: 0.95rem;
   color: #374151;
+}
+
+.compatibility-dish-name {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-style: italic;
 }
 
 .compatibility-overall-score {

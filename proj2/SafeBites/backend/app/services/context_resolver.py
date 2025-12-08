@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-llm = ChatOpenAI(model="gpt-4o-mini",temperature=1,openai_api_key=os.getenv("OPENAI_KEY"),callbacks=[LLMUsageTracker()])
+llm = ChatOpenAI(model="gpt-4o-mini",temperature=0,openai_api_key=os.getenv("OPENAI_KEY"),callbacks=[LLMUsageTracker()])
 
 def resolve_context(state):
     """
@@ -92,7 +92,19 @@ def resolve_context(state):
         if not rewritten_query:
             raise GenericException("LLM returned an empty rewritten query.")
 
-        context_summary_prompt = ChatPromptTemplate.from_template("""
+        # Check if context has actual conversation history (not just user profile)
+        has_conversation_history = False
+        if state.context:
+            for item in state.context:
+                # Check if context item has query/menu_results/info_results (actual conversation)
+                if any(key in item for key in ['query', 'menu_results', 'info_results', 'intents']):
+                    has_conversation_history = True
+                    break
+
+        # Only create context summary if there's actual conversation history
+        current_context = ""
+        if has_conversation_history:
+            context_summary_prompt = ChatPromptTemplate.from_template("""
     You are summarizing conversation context for another LLM.
     Given the following context, extract only relevant information that might help answer the query below.
 
@@ -100,16 +112,18 @@ def resolve_context(state):
     Query: {query}
 
     Return a short, factual summary (under 300 words) describing relevant dishes, filters, or results.
+    DO NOT mention user allergens or dietary preferences - those are handled separately.
     """)
-        
-        summary_response = llm.invoke(context_summary_prompt.format_messages(
-            context=state.context or {},
-            query=rewritten_query
-        ))
 
-        current_context = summary_response.content.strip()
+            summary_response = llm.invoke(context_summary_prompt.format_messages(
+                context=state.context or {},
+                query=rewritten_query
+            ))
+
+            current_context = summary_response.content.strip()
 
         logger.debug(f"Resolved Context Response: {current_context}")
+        logger.debug(f"Has conversation history: {has_conversation_history}")
 
         return {
             "query": rewritten_query,
