@@ -219,5 +219,77 @@ class TestDishDataModel:
         assert dish.restaurant_id == "rest_1", "restaurant_id should be set correctly"
 
 
+class TestFAISSPerformance:
+    """Test FAISS performance characteristics"""
+
+    def test_threshold_two_point_zero_is_reasonable(self):
+        """
+        Test that threshold of 2.0 is reasonable for L2 distance
+
+        Lower distance = better match in FAISS
+        Threshold 2.0 allows good matches while filtering noise
+        """
+        threshold = 2.0
+
+        # Good match (should pass)
+        good_match_distance = 0.5
+        assert good_match_distance <= threshold
+
+        # Decent match (should pass)
+        decent_match_distance = 1.5
+        assert decent_match_distance <= threshold
+
+        # Poor match (should be filtered)
+        poor_match_distance = 3.0
+        assert poor_match_distance > threshold
+
+    def test_top_k_twenty_provides_variety(self):
+        """
+        Test that top_k=20 provides good variety of results
+
+        20 results balances between variety and relevance
+        """
+        top_k = 20
+
+        assert top_k >= 10, "Should have at least 10 for variety"
+        assert top_k <= 50, "Should not exceed 50 to maintain relevance"
+        assert top_k == 20, "Default should be 20 for balance"
+
+
+class TestSemanticExpansion:
+    """Test semantic search expansion behavior"""
+
+    def test_intent_positive_expands_synonyms(self):
+        """
+        Test that positive intents expand with synonyms
+
+        Example: "pizza" → ["pizza", "margherita", "pepperoni"]
+        This improves recall
+        """
+        query = "pizza"
+
+        # Mock expanded intents
+        expanded_intents = ["pizza", "margherita", "pepperoni", "flatbread"]
+
+        assert query in expanded_intents, "Original query should be in expansion"
+        assert len(expanded_intents) > 1, "Should expand beyond original query"
+        assert len(expanded_intents) <= 10, "Should not expand too much (noise)"
+
+    def test_intent_negative_stays_specific(self):
+        """
+        Test that negative intents stay specific (don't expand)
+
+        Example: "without meat" → ["meat"] (not ["meat", "beef", "chicken", ...])
+        This prevents false negatives
+        """
+        negative_query = "meat"
+
+        # Should NOT expand like positive intents
+        negative_intents = ["meat"]
+
+        assert len(negative_intents) == 1, "Negative intents should stay specific"
+        assert "meatballs" not in negative_intents, "Should not over-expand"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

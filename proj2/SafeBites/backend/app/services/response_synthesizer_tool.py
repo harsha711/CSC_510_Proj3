@@ -96,7 +96,9 @@ def format_final_response(state:ChatState):
                     reverse=True
                 )
 
-                logger.debug(f"Sorted {len(dish_results)} dishes by compatibility score (descending)")
+                # Filter to only include dishes with compatibility scores (max 7)
+                dish_results = [d for d in dish_results if d.compatibility_score is not None]
+                logger.debug(f"Filtered to {len(dish_results)} dishes with compatibility scores")
 
                 responses.append(QueryResponse(
                     query=query,
